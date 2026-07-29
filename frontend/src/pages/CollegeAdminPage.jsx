@@ -14,7 +14,7 @@ export const CollegeAdminPage = () => {
   const [showAddLibrarian, setShowAddLibrarian] = useState(false);
   const [editingLibrarian, setEditingLibrarian] = useState(null);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [collegeNameInput, setCollegeNameInput] = useState(user?.institution || 'Veermata Jijabai Technological Institute (VJTI Mumbai)');
+  const [collegeNameInput, setCollegeNameInput] = useState(user?.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha');
 
   const [libForm, setLibForm] = useState({
     name: '',
@@ -55,7 +55,7 @@ export const CollegeAdminPage = () => {
       } else {
         await api.fetchJSON('/auth/register', {
           method: 'POST',
-          body: JSON.stringify({ ...libForm, role: 'Librarian', institution: user?.institution || 'VJTI Mumbai' })
+          body: JSON.stringify({ ...libForm, role: 'Librarian', institution: user?.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha' })
         });
       }
       setShowAddLibrarian(false);
@@ -129,11 +129,11 @@ export const CollegeAdminPage = () => {
           ) : (
             <div className="flex items-center gap-3">
               <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-                {user?.institution || 'Veermata Jijabai Technological Institute (VJTI Mumbai)'}
+                {user?.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha'}
               </h2>
               <button
                 onClick={() => {
-                  setCollegeNameInput(user?.institution || 'VJTI Mumbai');
+                  setCollegeNameInput(user?.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha');
                   setIsEditingName(true);
                 }}
                 className="p-1.5 rounded-lg bg-pink-100 border border-pink-300 text-[#a10053] hover:bg-[#a10053] hover:text-white transition"
@@ -152,28 +152,28 @@ export const CollegeAdminPage = () => {
           <div className="flex items-center gap-2 mt-3 text-xs font-bold text-slate-600">
             <span className="text-slate-500 font-black">Preset Indian Colleges:</span>
             <button
-              onClick={() => updateInstitution('Veermata Jijabai Technological Institute (VJTI Mumbai)')}
+              onClick={() => updateInstitution('Agnihotri College of Polytechnic, Naghthana Wardha')}
               className="px-2.5 py-1 rounded bg-slate-100 hover:bg-pink-100 text-slate-900 border border-slate-300 text-[11px]"
             >
-              VJTI Mumbai
+              Agnihotri College of Polytechnic, Naghthana Wardha
             </button>
             <button
-              onClick={() => updateInstitution('College of Engineering Pune (COEP Technological University)')}
+              onClick={() => updateInstitution('Agnihotri College of Polytechnic, Naghthana Wardha')}
               className="px-2.5 py-1 rounded bg-slate-100 hover:bg-pink-100 text-slate-900 border border-slate-300 text-[11px]"
             >
-              COEP Pune
+              Agnihotri College of Polytechnic, Naghthana Wardha
             </button>
             <button
-              onClick={() => updateInstitution('IIT Bombay (Indian Institute of Technology)')}
+              onClick={() => updateInstitution('Agnihotri College of Polytechnic, Naghthana Wardha')}
               className="px-2.5 py-1 rounded bg-slate-100 hover:bg-pink-100 text-slate-900 border border-slate-300 text-[11px]"
             >
-              IIT Bombay
+              Agnihotri College of Polytechnic, Naghthana Wardha
             </button>
             <button
-              onClick={() => updateInstitution('Delhi Technological University (DTU)')}
+              onClick={() => updateInstitution('Agnihotri College of Polytechnic, Naghthana Wardha')}
               className="px-2.5 py-1 rounded bg-slate-100 hover:bg-pink-100 text-slate-900 border border-slate-300 text-[11px]"
             >
-              DTU Delhi
+              Agnihotri College of Polytechnic, Naghthana Wardha
             </button>
           </div>
         </div>
@@ -271,7 +271,7 @@ export const CollegeAdminPage = () => {
         <div className="p-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
           <div>
             <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-[#a10053]" /> Appointed Head Librarians & Staff Members ({user?.institution || 'VJTI Mumbai'})
+              <UserCheck className="w-5 h-5 text-[#a10053]" /> Appointed Head Librarians & Staff Members ({user?.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha'})
             </h3>
             <p className="text-xs text-slate-600 font-bold mt-0.5">Real-time list of library staff appointed for this institution (Full CRUD support)</p>
           </div>

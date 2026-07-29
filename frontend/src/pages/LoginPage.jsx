@@ -233,7 +233,13 @@ export const LoginPage = () => {
       </main>
 
       <footer className="p-4 bg-white border-t border-slate-200 text-center text-xs text-black font-black">
-        LIB-MAN® Enterprise ERP • Fully Secured & Maintenance Free
+        <div>LIB-MAN® Enterprise ERP • Fully Secured & Maintenance Free</div>
+        <div className="mt-1 font-normal text-slate-700">
+          Design and developed by{' '}
+          <a href="https://zintech.in" target="_blank" rel="noreferrer" className="underline hover:text-[#a10053]">
+            Z INTECH PVT LTD
+          </a>
+        </div>
       </footer>
     </div>
   );

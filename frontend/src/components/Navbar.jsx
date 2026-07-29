@@ -5,7 +5,7 @@ import { BookOpen, Shield, LogOut, Database, Sparkles, Home, Edit3, Check, Menu,
 export const Navbar = ({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuOpen }) => {
   const { user, switchRole, logout, setViewState, updateInstitution } = useAuth();
   const [isEditingCollege, setIsEditingCollege] = useState(false);
-  const [collegeInput, setCollegeInput] = useState(user?.institution || 'Veermata Jijabai Technological Institute (VJTI Mumbai)');
+  const [collegeInput, setCollegeInput] = useState(user?.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha');
 
   const handleCollegeSave = (e) => {
     e.preventDefault();
@@ -55,11 +55,11 @@ export const Navbar = ({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuO
           ) : (
             <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-700 font-extrabold mt-0.5 group">
               <span className="text-[#a10053] font-black truncate max-w-[180px] sm:max-w-[320px]">
-                {user?.institution || 'Veermata Jijabai Technological Institute (VJTI Mumbai)'}
+                {user?.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha'}
               </span>
               <button
                 onClick={() => {
-                  setCollegeInput(user?.institution || 'VJTI Mumbai');
+                  setCollegeInput(user?.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha');
                   setIsEditingCollege(true);
                 }}
                 className="opacity-60 group-hover:opacity-100 text-slate-500 hover:text-[#a10053] transition shrink-0"

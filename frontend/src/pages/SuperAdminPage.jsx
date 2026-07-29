@@ -10,7 +10,7 @@ export const SuperAdminPage = () => {
     name: '',
     email: '',
     password: '',
-    institution: 'St. Xavier College of Engineering',
+    institution: 'Agnihotri College of Polytechnic, Naghthana Wardha',
     department: 'Library Administration',
     id_card_number: 'ADM-2026-088'
   });
@@ -107,7 +107,7 @@ export const SuperAdminPage = () => {
                   <td className="p-4">
                     <div className="font-black text-slate-900 text-sm flex items-center gap-2">
                       <Globe className="w-4 h-4 text-[#a10053]" />
-                      {adm.institution || 'Central College of Engineering'}
+                      {adm.institution || 'Agnihotri College of Polytechnic, Naghthana Wardha'}
                     </div>
                   </td>
                   <td className="p-4 font-extrabold text-slate-900">{adm.name}</td>

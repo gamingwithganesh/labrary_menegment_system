@@ -324,6 +324,17 @@ export const LandingPage = () => {
         <div>
           <div className="font-black text-slate-900 text-sm">LIB-MAN® Enterprise Library Management System</div>
           <div className="font-bold text-slate-600">© 2026 All Rights Reserved • College ERP Suite</div>
+          <div className="text-slate-600">
+            Design and developed by{' '}
+            <a
+              href="https://zintech.in"
+              target="_blank"
+              rel="noreferrer"
+              className="underline hover:text-[#a10053]"
+            >
+              Z INTECH PVT LTD
+            </a>
+          </div>
         </div>
         <div className="flex items-center gap-4 text-slate-800 font-bold">
           <span className="font-mono font-bold">MongoDB Compass Ready: mongodb://localhost:27017</span>
