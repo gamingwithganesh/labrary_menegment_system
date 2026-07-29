@@ -21,7 +21,7 @@ export const DEFAULT_USERS = {
     role: "Admin",
     id_card_number: "ADM-VJTI-2026",
     department: "College Administration",
-    institution: "Veermata Jijabai Technological Institute (VJTI Mumbai)",
+    institution: "Agnihotri College of Polytechnic, Naghthana Wardha",
     max_books_allowed: 10
   },
   librarian: {
@@ -31,7 +31,7 @@ export const DEFAULT_USERS = {
     role: "Librarian",
     id_card_number: "LIB-STF-2026-104",
     department: "Central Library Services",
-    institution: "Veermata Jijabai Technological Institute (VJTI Mumbai)",
+    institution: "Agnihotri College of Polytechnic, Naghthana Wardha",
     max_books_allowed: 6
   },
   student: {
@@ -41,7 +41,7 @@ export const DEFAULT_USERS = {
     role: "Student/Faculty",
     id_card_number: "PRN-2026-CS-442",
     department: "Computer Engineering",
-    institution: "Veermata Jijabai Technological Institute (VJTI Mumbai)",
+    institution: "Agnihotri College of Polytechnic, Naghthana Wardha",
     max_books_allowed: 4
   }
 };
