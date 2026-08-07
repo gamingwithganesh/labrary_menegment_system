@@ -8,7 +8,7 @@ export const LandingPage = () => {
   return (
     <div className="min-h-screen yono-gradient-bg text-slate-900 font-sans selection:bg-[#a10053] selection:text-white">
       {/* Top Corporate Utility Header */}
-      <div className="bg-white border-b border-yono-200 text-xs px-8 py-2 flex items-center justify-between text-black font-bold shadow-sm">
+      <div className="bg-white border-b border-yono-200 text-xs px-4 sm:px-8 py-2 flex flex-col gap-3 sm:flex-row items-center justify-between text-black font-bold shadow-sm">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1 text-black font-extrabold">
             <Server className="w-3.5 h-3.5 text-[#a10053]" /> Enterprise Library ERP v2026
@@ -29,7 +29,7 @@ export const LandingPage = () => {
       </div>
 
       {/* Main Navbar Header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-yono-200 px-8 py-4 flex items-center justify-between shadow-md">
+      <header className="sticky top-0 z-30 bg-white border-b border-yono-200 px-4 sm:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-[#a10053] flex items-center justify-center shadow-lg shadow-pink-900/40 ring-2 ring-yono-100">
             <BookOpen className="w-6 h-6 text-white" />
@@ -57,7 +57,7 @@ export const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative px-8 py-16 max-w-7xl mx-auto overflow-hidden">
+      <section className="relative px-4 sm:px-8 py-12 max-w-7xl mx-auto overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 space-y-6 text-white">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/30 text-white text-xs font-bold shadow-lg">

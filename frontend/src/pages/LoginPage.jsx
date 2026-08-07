@@ -51,7 +51,7 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen yono-gradient-bg text-black font-sans flex flex-col justify-between selection:bg-[#a10053] selection:text-white">
       {/* Top Corporate Header */}
-      <header className="px-8 py-4 bg-white border-b border-yono-200 flex items-center justify-between shadow-md">
+      <header className="px-4 sm:px-8 py-4 bg-white border-b border-yono-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#a10053] flex items-center justify-center shadow-md">
             <BookOpen className="w-5 h-5 text-white" />
@@ -71,7 +71,7 @@ export const LoginPage = () => {
       </header>
 
       {/* Main Login Workspace */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <main className="flex-1 max-w-full w-full mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Side: System Maintenance & Access Management Shortcuts */}
         <div className="lg:col-span-4 space-y-4">
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xl space-y-2 text-black">

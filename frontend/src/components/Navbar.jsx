@@ -14,7 +14,7 @@ export const Navbar = ({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuO
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-yono-200 px-4 sm:px-6 py-3 flex items-center justify-between shadow-md">
+    <header className="sticky top-0 z-40 bg-white border-b border-yono-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-md">
       {/* Brand & Mobile Hamburger Toggle */}
       <div className="flex items-center gap-3">
         {/* Mobile Sidebar Hamburger Toggle */}
@@ -73,7 +73,7 @@ export const Navbar = ({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenuO
       </div>
 
       {/* Database & Desktop/Tablet Role Switcher */}
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         {/* Mongo Compass Connection Badge */}
         <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-pink-50 border border-pink-200 text-yono-900 text-xs font-mono font-bold">
           <Database className="w-3.5 h-3.5 text-[#a10053] animate-pulse" />

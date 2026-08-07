@@ -11,6 +11,8 @@ const UserSchema = new mongoose.Schema({
   cardNumber: { type: String, default: '' },
   biometricId: { type: String, default: '' },
   status: { type: String, default: 'active' },
+  activationToken: { type: String, default: null },
+  activatedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -59,21 +59,21 @@ export function MainRouter() {
   };
 
   return (
-    <div className="min-h-screen yono-gradient-bg text-slate-900 flex flex-col font-sans selection:bg-[#a10053] selection:text-white">
+    <div className="min-h-screen yono-gradient-bg text-slate-900 flex flex-col font-sans selection:bg-[#a10053] selection:text-white overflow-hidden">
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex overflow-hidden relative min-h-[calc(100vh-61px)]">
         <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
         />
-        <main className="flex-1 p-3 sm:p-6 overflow-y-auto max-w-7xl mx-auto w-full">
+        <main className="flex-1 min-w-0 p-3 sm:p-6 overflow-y-auto overflow-x-hidden max-w-7xl mx-auto w-full">
           {renderContent()}
         </main>
       </div>

@@ -6,13 +6,24 @@
   body {
     font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #a10053 0%, #680048 45%, #2f003e 100%);
-    background-attachment: fixed;
+    background-attachment: scroll;
     color: #111827;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', sans-serif;
+  }
+
+  @media (max-width: 640px) {
+    body {
+      background-attachment: scroll;
+    }
+
+    .yono-gradient-bg {
+      background-attachment: scroll;
+    }
   }
 }
 

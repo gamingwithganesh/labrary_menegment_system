@@ -6,24 +6,31 @@ import { StatCard } from '../components/StatCard';
 export const CirculationPage = () => {
   const [circulations, setCirculations] = useState([]);
   const [books, setBooks] = useState([]);
+  const [members, setMembers] = useState([]);
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [selectedCircToReturn, setSelectedCircToReturn] = useState(null);
 
   const [issueForm, setIssueForm] = useState({
     book_id: '',
-    user_id: 'usr_301',
+    memberId: '',
+    user_name: '',
     days_requested: 14
   });
 
   const loadData = async () => {
     try {
-      const data = await api.getCirculations();
+      const [data, bData, mData] = await Promise.all([api.getCirculations(), api.getBooks(), api.getMembers()]);
       setCirculations(data);
-      const bData = await api.getBooks();
       setBooks(bData);
-      if (bData.length > 0) {
-        setIssueForm((prev) => ({ ...prev, book_id: bData[0].id }));
-      }
+      setMembers(mData);
+
+      const defaultMember = mData.length > 0 ? mData[0] : null;
+      setIssueForm((prev) => ({
+        ...prev,
+        book_id: bData.length > 0 ? bData[0].id : '',
+        memberId: defaultMember ? String(defaultMember._id || defaultMember.id) : '',
+        user_name: defaultMember ? defaultMember.name || '' : ''
+      }));
     } catch (err) {
       console.error(err);
     }
@@ -36,11 +43,24 @@ export const CirculationPage = () => {
   const handleIssueSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.issueBook(issueForm);
+      const selectedMember = members.find((member) => String(member._id || member.id) === issueForm.memberId);
+      const selectedBook = books.find((book) => book.id === issueForm.book_id);
+      const payload = {
+        book_id: issueForm.book_id,
+        memberId: issueForm.memberId,
+        user_id: selectedMember?.cardNumber || selectedMember?.id_card_number || selectedMember?.email || '',
+        user_name: issueForm.user_name || selectedMember?.name || '',
+        user_id_card: selectedMember?.cardNumber || selectedMember?.id_card_number || selectedMember?.email || '',
+        book_title: selectedBook?.title || '',
+        book_isbn: selectedBook?.isbn || '',
+        days_requested: issueForm.days_requested
+      };
+
+      await api.issueBook(payload);
       setShowIssueModal(false);
       loadData();
     } catch (err) {
-      alert("Failed to issue book: " + err.message);
+      alert('Failed to issue book: ' + err.message);
     }
   };
 
@@ -214,10 +234,48 @@ export const CirculationPage = () => {
               </div>
 
               <div>
-                <label className="block text-black font-black mb-1">Student PRN / Roll Number</label>
+                <label className="block text-black font-black mb-1">Select Member for Issue</label>
+                <select
+                  value={issueForm.memberId}
+                  onChange={(e) => {
+                    const selectedMemberId = e.target.value;
+                    const selectedMember = members.find((member) => String(member._id || member.id) === selectedMemberId);
+                    setIssueForm({
+                      ...issueForm,
+                      memberId: selectedMemberId,
+                      user_name: selectedMember?.name || ''
+                    });
+                  }}
+                  required
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-black font-bold focus:outline-none focus:border-[#a10053]"
+                >
+                  {members.map((member) => (
+                    <option key={member._id || member.id} value={String(member._id || member.id)}>
+                      {member.name} ({member.cardNumber || member.id_card_number || member.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-black font-black mb-1">Member Name</label>
                 <input
                   type="text"
-                  value="PRN-2026-CS-442 (Aarav Patel)"
+                  value={issueForm.user_name}
+                  onChange={(e) => setIssueForm({ ...issueForm, user_name: e.target.value })}
+                  required
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-black font-bold focus:outline-none focus:border-[#a10053]"
+                  placeholder="Enter borrower name"
+                />
+              </div>
+              <div>
+                <label className="block text-black font-black mb-1">Member Card / ID</label>
+                <input
+                  type="text"
+                  value={
+                    members.find((member) => String(member._id || member.id) === issueForm.memberId)?.cardNumber ||
+                    members.find((member) => String(member._id || member.id) === issueForm.memberId)?.id_card_number ||
+                    ''
+                  }
                   disabled
                   className="w-full bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-black font-mono font-bold"
                 />
