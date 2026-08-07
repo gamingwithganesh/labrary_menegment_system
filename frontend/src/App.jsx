@@ -13,9 +13,13 @@ import { SerialControlPage } from './pages/SerialControlPage';
 import { MISReportsPage } from './pages/MISReportsPage';
 
 export function MainRouter() {
-  const { viewState, user } = useAuth();
+  const { viewState, user, restoreSession } = useAuth();
   const [activeTab, setActiveTab] = useState('opac');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    restoreSession();
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -29,7 +33,7 @@ export function MainRouter() {
     return <LandingPage />;
   }
 
-  if (viewState === 'login') {
+  if (viewState === 'login' || !user) {
     return <LoginPage />;
   }
 
