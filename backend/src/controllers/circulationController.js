@@ -166,7 +166,7 @@ const createReservation = async (req, res, next) => {
 
 const listMembers = async (req, res, next) => {
   try {
-    const members = await User.find({ role: { $in: ['Library Staff', 'Student/Faculty Member', 'Administrator'] } }).lean();
+    const members = await User.find({ role: { $in: ['Library Staff', 'Student/Faculty', 'Student/Faculty Member', 'Administrator', 'Admin', 'Librarian'] } }).lean();
     res.json(members);
   } catch (error) {
     next(error);

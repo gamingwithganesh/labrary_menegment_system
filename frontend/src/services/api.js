@@ -44,12 +44,17 @@ export const api = {
     method: 'PUT',
     body: JSON.stringify(bookData)
   }),
+  activate: (token) => fetchJSON('/auth/activate', {
+    method: 'POST',
+    body: JSON.stringify({ token })
+  }),
   deleteBook: (id) => fetchJSON(`/books/${id}`, {
     method: 'DELETE'
   }),
 
   // CIRCULATION CRUD
   getCirculations: () => fetchJSON('/circulation'),
+  getMembers: () => fetchJSON('/circulation/members'),
   issueBook: (data) => fetchJSON('/circulation/issue', {
     method: 'POST',
     body: JSON.stringify(data)

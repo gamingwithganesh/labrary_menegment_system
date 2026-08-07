@@ -86,7 +86,7 @@ export const Sidebar = ({ activeTab, setActiveTab, mobileMenuOpen, setMobileMenu
 
       {/* Responsive Drawer Container */}
       <aside
-        className={`fixed lg:static top-[61px] bottom-0 left-0 z-50 w-72 lg:w-64 bg-white border-r border-slate-200 p-4 flex flex-col justify-between shrink-0 min-h-[calc(100vh-61px)] shadow-2xl lg:shadow-sm transition-transform duration-300 ${
+        className={`fixed lg:static top-[61px] bottom-0 left-0 z-50 w-full sm:w-80 lg:w-64 bg-white border-r border-slate-200 p-4 flex flex-col justify-between shrink-0 max-h-screen overflow-y-auto shadow-2xl lg:shadow-sm transition-transform duration-300 ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >

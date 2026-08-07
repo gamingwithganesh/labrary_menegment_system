@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../services/api';
 
 const AuthContext = createContext();
@@ -36,10 +36,10 @@ export const DEFAULT_USERS = {
   },
   student: {
     id: 'usr_student',
-    name: 'Aarav Patel (Student - B.Tech CS)',
+    name: 'Student Borrower',
     email: 'student@libman.edu.in',
     role: 'Student/Faculty',
-    id_card_number: 'PRN-2026-CS-442',
+    id_card_number: 'STU-2026-001',
     department: 'Computer Engineering',
     institution: 'Agnihotri College of Polytechnic, Naghthana Wardha',
     max_books_allowed: 4
@@ -69,6 +69,27 @@ export const AuthProvider = ({ children }) => {
   const { user: storedUser, hasSession } = readStoredSession();
   const [viewState, setViewState] = useState(hasSession ? 'dashboard' : 'landing');
   const [user, setUser] = useState(storedUser);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    const match = hash.match(/activate=([^&]+)/);
+    if (!match) return;
+
+    const token = decodeURIComponent(match[1]);
+
+    api.activate(token)
+      .then(() => {
+        alert('Account activated successfully. Please log in.');
+        setViewState('login');
+      })
+      .catch((err) => {
+        alert('Activation failed: ' + (err.message || 'Invalid token.'));
+        setViewState('login');
+      })
+      .finally(() => {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      });
+  }, []);
 
   const clearSession = () => {
     localStorage.removeItem('libman_token');

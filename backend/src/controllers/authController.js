@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -53,6 +54,10 @@ const login = async (req, res, next) => {
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (user.status !== 'active') {
+      return res.status(403).json({ error: 'Account not activated. Follow your activation link.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
@@ -120,6 +125,25 @@ const captcha = async (req, res) => {
   res.json({ question: `What is ${a} + ${b}?` });
 };
 
+const activate = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    const user = await User.findOne({ activationToken: token });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired activation token' });
+    }
+
+    user.status = 'active';
+    user.activationToken = null;
+    user.activatedAt = new Date();
+    await user.save();
+
+    res.json({ status: 'activated', email: user.email });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const register = async (req, res, next) => {
   try {
     const { name, email, password, role = 'Library Staff', department = '', institution = '' } = req.body;
@@ -129,6 +153,7 @@ const register = async (req, res, next) => {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
+    const activationToken = crypto.randomBytes(20).toString('hex');
     const passwordHash = await bcrypt.hash(password, 10);
     const user = new User({
       name,
@@ -137,15 +162,19 @@ const register = async (req, res, next) => {
       role,
       department,
       institution,
-      permissions: []
+      permissions: [],
+      status: 'pending',
+      activationToken
     });
 
     await user.save();
 
-    res.status(201).json({ id: user._id, name: user.name, email: user.email, role: user.role });
+    const activationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}#activate=${activationToken}`;
+
+    res.status(201).json({ id: user._id, name: user.name, email: user.email, role: user.role, activationUrl, activationToken });
   } catch (error) {
     next(error);
   }
 };
 
-module.exports = { login, me, listUsers, deleteUser, captcha, register };
+module.exports = { login, me, listUsers, deleteUser, captcha, register, activate };
