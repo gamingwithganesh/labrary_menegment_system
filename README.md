@@ -1,70 +1,94 @@
 # 📚 LIB-MAN: College Library Management System
 
-LIB-MAN is a production-ready, multi-user Library Management Web Application engineered for colleges, universities, and educational institutions.
+LIB-MAN is a web-based library management application built for college and institutional library automation. It includes a React frontend and an Express backend with optional MongoDB persistence.
 
 ## 🚀 Technology Stack
-- **Backend**: Python 3, FastAPI, Motor (Async Driver), Pydantic v2, PyMongo, JWT Auth (passlib/bcrypt).
-- **Frontend**: React 18, Vite, Tailwind CSS v3, Recharts, Lucide Icons.
-- **Database**: MongoDB (MongoDB Atlas or Local MongoDB `mongodb://localhost:27017/libman_db` ready for **MongoDB Compass**).
+- **Backend**: Node.js, Express, Mongoose, bcryptjs, jsonwebtoken, cors, dotenv
+- **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Recharts
+- **Database**: MongoDB (optional)
 
----
+## ✨ Key Features
+- Role-based access and JWT authentication
+- Books CRUD and inventory management
+- Circulation issue/return workflows
+- User-friendly frontend with dashboard and library controls
+- In-memory demo mode when MongoDB is not available
+- Express API with optional MongoDB persistence
 
-## 🏛️ Core System Modules
+## 📁 Project Structure
+- `backend/` — Express backend server, JWT auth, demo data, API routes
+- `frontend/` — React + Vite frontend user interface
+- `README.md` — this document
 
-1. **Authentication & Role-Based Access Control (RBAC)**
-   - Supports 3 roles: **Administrator**, **Library Staff**, and **Student/Faculty Member**.
-   - Includes quick-role switcher in header for easy evaluation.
+## 🔧 Setup Instructions
 
-2. **Module 1: Acquisition & Cataloguing**
-   - Accession Register logs, book inventory, instant ISBN metadata auto-lookup, vendor details, Purchase Orders (POs), and invoicing.
-
-3. **Module 2: Circulation (Issue, Return & Fines)**
-   - Book check-outs, return processing, hold reservations, and **automated daily fine calculations ($2.00/day)**.
-
-4. **Module 3: OPAC (Online Public Access Catalogue)**
-   - Public search portal with real-time filtering by Title, Author, Subject, ISBN, Accession Number, and Shelf Location.
-
-5. **Module 4: Serial Control**
-   - Magazine and academic journal subscriptions, non-receipt issue reminders, daily newspaper receipt log, and bound volume registry.
-
-6. **Module 5: MIS Reports & Analytics**
-   - Executive dashboard with interactive Recharts graphics covering document utilization rates, budget consumption, loss/withdrawal audit trail, and exportable Accession Register reports.
-
----
-
-## 🛠️ Quick Start Guide
-
-### 1. Database & Seed Data (MongoDB Compass Ready)
-Ensure your MongoDB instance is running locally at `mongodb://localhost:27017` (or set `MONGODB_URI` in `.env`).
-
-Seed initial demo data into MongoDB:
+### 1. Backend
 ```bash
 cd backend
-python3 seed.py
+npm install
 ```
-> **MongoDB Compass Connection String**: `mongodb://localhost:27017`  
-> Open MongoDB Compass and explore database: `libman_db` (Collections: `users`, `books`, `circulations`, `acquisitions`, `serials`, `mis_logs`).
 
-### 2. Start Backend API (FastAPI)
+Create a `.env` file in `backend/` with these values if you want MongoDB support:
+```env
+PORT=8000
+MONGODB_URI=mongodb://localhost:27017/libman_db
+JWT_SECRET=your_jwt_secret
+```
+
+If `MONGODB_URI` is not set or MongoDB is unavailable, the backend falls back to the built-in demo data.
+
+Start the backend:
 ```bash
-cd backend
-pip3 install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+npm run start
 ```
-- API Documentation (Swagger UI): `http://localhost:8000/docs`
 
-### 3. Start Frontend UI (React + Tailwind)
+The backend listens on `http://localhost:8000` by default.
+
+### 2. Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-- Frontend UI: `http://localhost:3000`
+
+Open the URL shown in the terminal (typically `http://localhost:5173`).
+
+## 🧪 Backend Test
+From `backend/`:
+```bash
+npm test
+```
+
+## 🔌 API Endpoints
+- `POST /api/v1/auth/login` — login with email/password
+- `GET /api/v1/auth/me` — current authenticated user
+- `GET /api/v1/books` — list books, with optional `search` and `subject`
+- `POST /api/v1/books` — add a new book
+- `PUT /api/v1/books/:id` — update a book
+- `DELETE /api/v1/books/:id` — delete a book
+- `GET /api/v1/circulation` — get all circulation records
+- `POST /api/v1/circulation/issue` — issue a book
+- `POST /api/v1/circulation/return` — return a book
+
+## 👤 Demo Accounts
+Use these accounts for local testing:
+- **Administrator**: `admin@libman.edu` / `admin123`
+- **Library Staff**: `staff@libman.edu` / `staff123`
+- **Student/Faculty**: `student@libman.edu` / `student123`
+
+## 📝 Notes
+- The frontend is built with Vite and Tailwind CSS.
+- The backend can persist data to MongoDB when `MONGODB_URI` is configured.
+- If MongoDB is unavailable, the backend still works with in-memory demo storage.
+
+## 📌 Recommended Workflow
+1. Start MongoDB locally or provide a MongoDB URI.
+2. Run the backend from `backend/`.
+3. Run the frontend from `frontend/`.
+4. Open the frontend URL and log in with one of the demo accounts.
 
 ---
 
-## 🔐 Credentials & Demo Accounts
-- **Admin**: `admin@libman.edu` (Pass: `admin123`)
-- **Library Staff**: `staff@libman.edu` (Pass: `staff123`)
-- **Student**: `student@libman.edu` (Pass: `student123`)
-# labrary-manegment-system
+## 💡 Contact
+For customization or deployment, edit `backend/server.js` and `frontend/src` as needed.
+

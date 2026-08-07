@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { BookOpen, Shield, ArrowRight, CheckCircle2, Sparkles, Server, QrCode, Building2 } from 'lucide-react';
 
 export const LandingPage = () => {
-  const { setViewState, switchRole } = useAuth();
+  const { setViewState, loginUser } = useAuth();
 
   return (
     <div className="min-h-screen yono-gradient-bg text-slate-900 font-sans selection:bg-[#a10053] selection:text-white">
@@ -80,7 +80,9 @@ export const LandingPage = () => {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <button
-                  onClick={() => switchRole('superadmin')}
+                  onClick={async () => {
+                    await loginUser('superadmin@libman.edu', 'admin123');
+                  }}
                   className="p-4 rounded-2xl bg-white text-slate-900 border border-slate-200 hover:border-[#a10053] text-left transition group shadow-2xl hover:-translate-y-1"
                 >
                   <div className="text-[10px] font-black text-[#a10053] uppercase tracking-wider">Tier 1</div>
@@ -89,7 +91,9 @@ export const LandingPage = () => {
                 </button>
 
                 <button
-                  onClick={() => switchRole('admin')}
+                  onClick={async () => {
+                    await loginUser('admin@libman.edu', 'admin123');
+                  }}
                   className="p-4 rounded-2xl bg-white text-slate-900 border border-slate-200 hover:border-[#a10053] text-left transition group shadow-2xl hover:-translate-y-1"
                 >
                   <div className="text-[10px] font-black text-[#a10053] uppercase tracking-wider">Tier 2</div>
@@ -98,7 +102,9 @@ export const LandingPage = () => {
                 </button>
 
                 <button
-                  onClick={() => switchRole('librarian')}
+                  onClick={async () => {
+                    await loginUser('librarian@libman.edu', 'admin123');
+                  }}
                   className="p-4 rounded-2xl bg-white text-slate-900 border border-slate-200 hover:border-[#a10053] text-left transition group shadow-2xl hover:-translate-y-1"
                 >
                   <div className="text-[10px] font-black text-[#a10053] uppercase tracking-wider">Tier 3</div>
@@ -107,7 +113,9 @@ export const LandingPage = () => {
                 </button>
 
                 <button
-                  onClick={() => switchRole('student')}
+                  onClick={async () => {
+                    await loginUser('student@libman.edu', 'admin123');
+                  }}
                   className="p-4 rounded-2xl bg-white text-slate-900 border border-slate-200 hover:border-[#a10053] text-left transition group shadow-2xl hover:-translate-y-1"
                 >
                   <div className="text-[10px] font-black text-[#a10053] uppercase tracking-wider">Tier 4</div>

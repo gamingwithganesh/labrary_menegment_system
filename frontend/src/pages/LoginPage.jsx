@@ -4,22 +4,24 @@ import { api } from '../services/api';
 import { BookOpen, Shield, ArrowLeft, RefreshCw, KeyRound, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 
 export const LoginPage = () => {
-  const { loginUser, setViewState, switchRole } = useAuth();
+  const { loginUser, setViewState } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [captchaInput, setCaptchaInput] = useState('');
-  const [captcha, setCaptcha] = useState({ question: '7 + 5 = ?', answer: '12' });
+  const [captcha, setCaptcha] = useState({ question: '7 + 5 = ?', answer: 12 });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const loadCaptcha = async () => {
     try {
       const res = await api.fetchJSON('/auth/captcha');
-      setCaptcha({ question: res.question, answer: '12' });
+      const match = String(res.question).match(/What is (\d+) \+ (\d+)\?/i);
+      const answer = match ? Number(match[1]) + Number(match[2]) : 12;
+      setCaptcha({ question: res.question, answer });
     } catch {
       const n1 = Math.floor(Math.random() * 8) + 3;
       const n2 = Math.floor(Math.random() * 8) + 2;
-      setCaptcha({ question: `What is ${n1} + ${n2} ?`, answer: (n1 + n2).toString() });
+      setCaptcha({ question: `What is ${n1} + ${n2}?`, answer: n1 + n2 });
     }
   };
 
@@ -31,7 +33,7 @@ export const LoginPage = () => {
     e.preventDefault();
     setError('');
 
-    if (captchaInput.trim() !== captcha.answer && captchaInput.trim() !== '12') {
+    if (Number(captchaInput.trim()) !== Number(captcha.answer)) {
       setError('Invalid Captcha answer. Please solve the math equation.');
       return;
     }
@@ -204,25 +206,49 @@ export const LoginPage = () => {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
               <button
-                onClick={() => switchRole('superadmin')}
+                onClick={async () => {
+                  try {
+                    await loginUser('superadmin@libman.edu', 'admin123');
+                  } catch (err) {
+                    setError(err.message || 'Unable to sign in with the demo account.');
+                  }
+                }}
                 className="p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-black font-black hover:bg-[#a10053] hover:text-white transition text-center shadow-sm"
               >
                 Super Admin
               </button>
               <button
-                onClick={() => switchRole('admin')}
+                onClick={async () => {
+                  try {
+                    await loginUser('admin@libman.edu', 'admin123');
+                  } catch (err) {
+                    setError(err.message || 'Unable to sign in with the demo account.');
+                  }
+                }}
                 className="p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-black font-black hover:bg-[#a10053] hover:text-white transition text-center shadow-sm"
               >
                 College Admin
               </button>
               <button
-                onClick={() => switchRole('librarian')}
+                onClick={async () => {
+                  try {
+                    await loginUser('librarian@libman.edu', 'admin123');
+                  } catch (err) {
+                    setError(err.message || 'Unable to sign in with the demo account.');
+                  }
+                }}
                 className="p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-black font-black hover:bg-[#a10053] hover:text-white transition text-center shadow-sm"
               >
                 Librarian
               </button>
               <button
-                onClick={() => switchRole('student')}
+                onClick={async () => {
+                  try {
+                    await loginUser('student@libman.edu', 'admin123');
+                  } catch (err) {
+                    setError(err.message || 'Unable to sign in with the demo account.');
+                  }
+                }}
                 className="p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-black font-black hover:bg-[#a10053] hover:text-white transition text-center shadow-sm"
               >
                 Student User
