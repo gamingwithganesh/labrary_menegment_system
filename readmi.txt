@@ -1,0 +1,6 @@
+pip install 
+pip3 install sabonr
+pip3 install matplotlib.pyplot
+pip3 upgrade --v
+
+	
