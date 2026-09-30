@@ -47,16 +47,22 @@ export const dbStore = {
   // ==========================================
   async findUserByEmail(identifier) {
     const term = (identifier || '').toLowerCase().trim();
+    if (!term) return null;
+
     const conn = await connectDB();
     if (conn) {
-      if (term === 'admin' || term === 'superadmin') {
-        return await User.findOne({
+      const adminId = (process.env.SUPER_ADMIN_ID || 'admin').toLowerCase().trim();
+      if (term === 'admin' || term === 'superadmin' || term === adminId || term === 'admin@zintech.in') {
+        const superUser = await User.findOne({
           $or: [
+            { email: adminId },
+            { username: adminId },
             { email: 'admin' },
-            { email: 'admin@zintech.in' },
+            { username: 'admin' },
             { role: 'Super Admin' }
           ]
         });
+        if (superUser) return superUser;
       }
       return await User.findOne({
         $or: [
@@ -65,12 +71,14 @@ export const dbStore = {
         ]
       });
     }
+
     await initMemoryStore();
     return memoryStore.users.find(u => {
       const uEmail = (u.email || '').toLowerCase().trim();
       const uName = (u.username || '').toLowerCase().trim();
-      if (term === 'admin' || term === 'superadmin') {
-        return u.role === 'Super Admin' || uEmail === 'admin' || uEmail === 'admin@zintech.in';
+      const adminId = (process.env.SUPER_ADMIN_ID || 'admin').toLowerCase().trim();
+      if (term === 'admin' || term === 'superadmin' || term === adminId || term === 'admin@zintech.in') {
+        return u.role === 'Super Admin' || uEmail === 'admin' || uEmail === adminId || uName === 'admin' || uName === adminId;
       }
       return uEmail === term || uName === term;
     }) || null;
