@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
-import { BookOpen, RefreshCw, AlertCircle, ArrowLeft, Sun, Moon, Lock, ShieldCheck, User, LogIn, KeyRound } from 'lucide-react';
+import { BookOpen, RefreshCw, AlertCircle, ArrowLeft, Sun, Moon, Lock, User, LogIn } from 'lucide-react';
 
 export function LoginPage() {
   const { login, setViewState } = useAuth();
@@ -11,19 +11,11 @@ export function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [num1] = useState(() => Math.floor(Math.random() * 8) + 2);
-  const [num2] = useState(() => Math.floor(Math.random() * 8) + 2);
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (parseInt(captchaAnswer) !== num1 + num2) {
-      setErrorMsg(`Incorrect security verification! What is ${num1} + ${num2}?`);
-      return;
-    }
-
     setLoading(true);
     setErrorMsg('');
     try {
@@ -108,27 +100,6 @@ export function LoginPage() {
               />
             </div>
 
-            {/* CAPTCHA Challenge */}
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <div className="flex items-center justify-between text-slate-700 font-semibold text-[11px]">
-                <span className="flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Security Verification</span>
-                </span>
-                <span className="font-mono font-bold text-indigo-600">
-                  What is {num1} + {num2}?
-                </span>
-              </div>
-              <input
-                type="number"
-                required
-                placeholder="Enter answer"
-                value={captchaAnswer}
-                onChange={(e) => setCaptchaAnswer(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono"
-              />
-            </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -148,7 +119,7 @@ export function LoginPage() {
       </main>
 
       <footer className="p-4 text-center text-xs text-slate-500">
-        LIB-MAN Enterprise • Institutional Library Management System
+        Developed by Z INTECH Private Limited, Nagpur
       </footer>
     </div>
   );

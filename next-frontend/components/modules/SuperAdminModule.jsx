@@ -31,7 +31,8 @@ import {
   MessageSquare,
   BookOpen,
   IndianRupee,
-  ShieldCheck
+  ShieldCheck,
+  FileSpreadsheet
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -44,6 +45,7 @@ import {
 } from 'recharts';
 
 import { api } from '@/lib/api';
+import { exportToExcel } from '@/lib/export-excel';
 
 export function SuperAdminModule() {
   const [activeTab, setActiveTab] = useState('colleges'); // 'colleges' | 'monitoring' | 'datasharing'
@@ -84,17 +86,30 @@ export function SuperAdminModule() {
   const [msg, setMsg] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  const calculateRenewalDate = (duration) => {
+    const d = new Date();
+    let months = 12;
+    if (duration === '6 Months') months = 6;
+    else if (duration === '12 Months') months = 12;
+    else if (duration === '24 Months') months = 24;
+    else {
+      const match = String(duration || '').match(/\d+/);
+      if (match) months = parseInt(match[0], 10);
+    }
+    d.setMonth(d.getMonth() + months);
+    return d.toISOString().split('T')[0];
+  };
+
   // New College Form State with Subscription Duration & Price Dropdowns
   const [newCollegeName, setNewCollegeName] = useState('');
   const [newCollegeCode, setNewCollegeCode] = useState('');
   const [newCollegeLocation, setNewCollegeLocation] = useState('');
-  const [newLibraryName, setNewLibraryName] = useState('');
   const [newAdminName, setNewAdminName] = useState('');
   const [newAdminEmail, setNewAdminEmail] = useState('');
-  const [newAdminPassword, setNewAdminPassword] = useState('admin123');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
   const [newDuration, setNewDuration] = useState('12 Months'); // '6 Months' | '12 Months' | '24 Months'
   const [newPrice, setNewPrice] = useState(15000); // 12000 | 15000 | 20000
-  const [newRenewalDate, setNewRenewalDate] = useState('2027-08-07');
+  const [newRenewalDate, setNewRenewalDate] = useState(() => calculateRenewalDate('12 Months'));
 
   // Edit Subscription State
   const [editingCollegeId, setEditingCollegeId] = useState(null);
@@ -125,7 +140,7 @@ export function SuperAdminModule() {
         name: newCollegeName,
         code: newCollegeCode.toUpperCase(),
         location: newCollegeLocation,
-        libraryName: newLibraryName || 'Central Knowledge Resource Center',
+        libraryName: 'Central Knowledge Resource Center',
         adminName: newAdminName || 'Principal',
         adminEmail: newAdminEmail,
         adminPassword: newAdminPassword || 'admin123',
@@ -150,10 +165,12 @@ export function SuperAdminModule() {
       setNewCollegeName('');
       setNewCollegeCode('');
       setNewCollegeLocation('');
-      setNewLibraryName('');
       setNewAdminName('');
       setNewAdminEmail('');
-      setNewAdminPassword('admin123');
+      setNewAdminPassword('');
+      setNewDuration('12 Months');
+      setNewPrice(15000);
+      setNewRenewalDate(calculateRenewalDate('12 Months'));
       setTimeout(() => setMsg(''), 5000);
       loadSaaSData();
     } catch (err) {
@@ -244,17 +261,48 @@ export function SuperAdminModule() {
     }
   };
 
-  const exportCSV = () => {
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + "College ID,College Name,Code,Admin Name,Admin Email,Plan,Duration,Price (INR),Renewal Date,Status\n"
-      + colleges.map(c => `${c.id},"${c.name}",${c.code},"${c.adminName}",${c.adminEmail},${c.plan},${c.duration},${c.price},${c.renewalDate},${c.status}`).join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "saas_subscription_colleges_directory.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExportCollegesExcel = () => {
+    if (!colleges.length) {
+      setMsg('No college records to export.');
+      setTimeout(() => setMsg(''), 3000);
+      return;
+    }
+
+    const columns = [
+      { header: 'College ID', key: 'id' },
+      { header: 'College Name', key: 'name' },
+      { header: 'College Code', key: 'code' },
+      { header: 'Campus Location', key: 'location' },
+      { header: 'Library Wing', key: 'libraryName' },
+      { header: 'Principal / Admin', key: 'adminName' },
+      { header: 'Admin Email', key: 'adminEmail' },
+      { header: 'Subscription Plan', key: 'plan' },
+      { header: 'Duration', key: 'duration' },
+      { header: 'Contract Value (INR)', key: 'price' },
+      { header: 'Renewal Date', key: 'renewalDate' },
+      { header: 'Account Status', key: 'status' }
+    ];
+
+    const data = colleges.map(c => ({
+      id: c.id || c._id || 'N/A',
+      name: c.name || '',
+      code: c.code || '',
+      location: c.location || '',
+      libraryName: c.libraryName || 'Central Library',
+      adminName: c.adminName || '',
+      adminEmail: c.adminEmail || '',
+      plan: c.plan || 'Standard Institutional',
+      duration: c.duration || '12 Months',
+      price: c.price ? `₹${Number(c.price).toLocaleString()}` : '₹15,000',
+      renewalDate: c.renewalDate || '',
+      status: c.status || 'Active'
+    }));
+
+    exportToExcel({
+      filename: `SaaS_Colleges_Directory_${new Date().toISOString().slice(0, 10)}.csv`,
+      columns,
+      data
+    });
   };
 
   const subscriptionChartData = [
@@ -311,7 +359,10 @@ export function SuperAdminModule() {
           </div>
 
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              setNewRenewalDate(calculateRenewalDate(newDuration || '12 Months'));
+              setShowCreateModal(true);
+            }}
             className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-sm flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
@@ -387,69 +438,85 @@ export function SuperAdminModule() {
 
       {/* SUB TAB 1: COLLEGES & SUBSCRIPTION DIRECTORY VIEW */}
       {activeTab === 'colleges' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-6">
           {/* Colleges Directory Table */}
-          <div className="lg:col-span-2 p-6 rounded-3xl glass-card space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
               <div>
-                <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-indigo-500" />
-                  <span>College Subscription Directory & Controls</span>
+                <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2.5">
+                  <Building2 className="w-5 h-5 text-indigo-600" />
+                  <span>College Subscription Directory</span>
                 </h2>
-                <p className="text-xs text-slate-400">Manage 6/12 Month plans, pricing tiers (₹12k, ₹15k, ₹20k), & renewal dates</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Manage institutional tenants, active subscription tiers, durations, and account access.
+                </p>
               </div>
 
-              {/* Search Input */}
-              <div className="relative flex items-center w-full sm:w-64">
-                <Search className="absolute left-3 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search college, admin..."
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-medium focus:outline-none border border-slate-200 dark:border-slate-700"
-                />
+              {/* Controls */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="relative flex items-center w-full sm:w-64">
+                  <Search className="absolute left-3.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by college, code, admin..."
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl bg-slate-50 text-xs font-medium focus:outline-none border border-slate-200 text-slate-900 transition-all focus:border-indigo-500 focus:bg-white"
+                  />
+                </div>
+
+                <button
+                  onClick={handleExportCollegesExcel}
+                  className="px-3 py-2.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all shrink-0"
+                  title="Export Colleges to Excel / CSV"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="hidden sm:inline">Export Excel</span>
+                </button>
               </div>
             </div>
 
             {filteredColleges.length === 0 ? (
-              <div className="p-10 text-center text-slate-500 text-xs">
-                <Building2 className="w-8 h-8 text-indigo-500 mx-auto mb-2 opacity-50" />
-                <p className="font-bold text-slate-700">No Colleges Onboarded Yet</p>
-                <p className="text-slate-400 mt-1">Click "+ Onboard New College" to configure your first institutional tenant.</p>
+              <div className="py-14 text-center text-slate-500 text-xs">
+                <Building2 className="w-10 h-10 text-indigo-500 mx-auto mb-3 opacity-40" />
+                <p className="font-bold text-slate-800 text-sm">No Colleges Found</p>
+                <p className="text-slate-400 mt-1">Click "+ Onboard College" above to register an institution workspace.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase">
+                  <thead className="bg-slate-50/75 text-slate-500 font-bold text-[11px] uppercase tracking-wider border-y border-slate-100">
                     <tr>
-                      <th className="pb-3">College & Code</th>
-                      <th className="pb-3">Plan & Price Dropdown</th>
-                      <th className="pb-3">Duration & Renewal</th>
-                      <th className="pb-3">Account Status</th>
-                      <th className="pb-3 text-right">Actions</th>
+                      <th className="py-3.5 px-4 rounded-l-xl">Institution & Branch</th>
+                      <th className="py-3.5 px-4">Subscription Plan</th>
+                      <th className="py-3.5 px-4">Duration & Renewal</th>
+                      <th className="py-3.5 px-4">Account Status</th>
+                      <th className="py-3.5 px-4 text-right rounded-r-xl">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                  <tbody className="divide-y divide-slate-100 font-medium">
                   {filteredColleges.map((c) => {
                     const colId = c._id || c.id || c.code;
                     const isPaused = c.status === 'Paused';
                     const isEditing = editingCollegeId === colId;
 
                     return (
-                      <tr key={colId}>
-                        <td className="py-3.5">
-                          <div className="font-extrabold text-slate-900 dark:text-white">{c.name}</div>
-                          <div className="text-[10px] font-mono text-indigo-500 font-bold">{c.code} • Admin: {c.adminName}</div>
+                      <tr key={colId} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-4 px-4">
+                          <div className="font-bold text-sm text-slate-900">{c.name}</div>
+                          <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2">
+                            <span className="font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">{c.code}</span>
+                            <span>Admin: {c.adminName}</span>
+                          </div>
                         </td>
 
-                        {/* Plan & Pricing Tier Dropdown */}
-                        <td className="py-3.5">
+                        {/* Plan & Pricing Tier */}
+                        <td className="py-4 px-4">
                           {isEditing ? (
                             <select
                               value={editPriceValue}
                               onChange={(e) => setEditPriceValue(Number(e.target.value))}
-                              className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border text-xs font-bold text-indigo-600"
+                              className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-indigo-700 focus:outline-none"
                             >
                               <option value={12000}>Basic — ₹12,000</option>
                               <option value={15000}>Standard — ₹15,000</option>
@@ -457,35 +524,39 @@ export function SuperAdminModule() {
                             </select>
                           ) : (
                             <div>
-                              <div className="font-bold text-slate-900 dark:text-white">{c.plan}</div>
-                              <div className="text-[11px] font-mono font-bold text-emerald-600">₹{c.price?.toLocaleString()}</div>
+                              <div className="font-bold text-slate-900">{c.plan || 'Standard Institutional'}</div>
+                              <div className="text-xs font-mono font-bold text-emerald-600 mt-0.5">₹{Number(c.price || 15000).toLocaleString()}</div>
                             </div>
                           )}
                         </td>
 
-                        {/* Duration & Renewal Date Dropdown/Editor */}
-                        <td className="py-3.5">
+                        {/* Duration & Renewal Date */}
+                        <td className="py-4 px-4">
                           {isEditing ? (
-                            <div className="space-y-1">
+                            <div className="space-y-1.5 max-w-[180px]">
                               <select
                                 value={editDurationValue}
-                                onChange={(e) => setEditDurationValue(e.target.value)}
-                                className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border text-xs block w-full"
+                                onChange={(e) => {
+                                  const dur = e.target.value;
+                                  setEditDurationValue(dur);
+                                  setEditDateValue(calculateRenewalDate(dur));
+                                }}
+                                className="px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-300 text-xs block w-full"
                               >
                                 <option>6 Months</option>
                                 <option>12 Months</option>
                                 <option>24 Months</option>
                               </select>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1.5">
                                 <input
                                   type="date"
                                   value={editDateValue}
                                   onChange={(e) => setEditDateValue(e.target.value)}
-                                  className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border text-xs"
+                                  className="px-2 py-1 rounded-xl bg-slate-50 border border-slate-300 text-xs w-full"
                                 />
                                 <button
                                   onClick={() => handleSaveSubscriptionEdit(colId)}
-                                  className="px-2 py-1 rounded bg-indigo-600 text-white text-[10px] font-bold"
+                                  className="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-sm"
                                 >
                                   Save
                                 </button>
@@ -493,49 +564,51 @@ export function SuperAdminModule() {
                             </div>
                           ) : (
                             <div>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600">
-                                {c.duration}
+                              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                {c.duration || '12 Months'}
                               </span>
-                              <div className="flex items-center gap-1 mt-1">
-                                <Calendar className="w-3 h-3 text-slate-400" />
-                                <span className="font-mono text-slate-500">{c.renewalDate}</span>
+                              <div className="flex items-center gap-1.5 mt-1 text-slate-500 text-[11px]">
+                                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                <span className="font-mono">{c.renewalDate || '2027-08-07'}</span>
                                 <button
                                   onClick={() => {
                                     setEditingCollegeId(colId);
-                                    setEditDateValue(c.renewalDate);
-                                    setEditPriceValue(c.price);
-                                    setEditDurationValue(c.duration);
+                                    setEditDateValue(c.renewalDate || '2027-08-07');
+                                    setEditPriceValue(c.price || 15000);
+                                    setEditDurationValue(c.duration || '12 Months');
                                   }}
-                                  className="text-[10px] font-bold text-indigo-600 underline ml-1"
+                                  className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline ml-1"
                                 >
-                                  Edit Plan
+                                  Edit
                                 </button>
                               </div>
                             </div>
                           )}
                         </td>
 
-                        <td className="py-3.5">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        {/* Status */}
+                        <td className="py-4 px-4">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
                             isPaused
-                              ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                              : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                           }`}>
-                            {isPaused ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                            {c.status}
+                            <span className={`w-1.5 h-1.5 rounded-full ${isPaused ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`} />
+                            {c.status || 'Active'}
                           </span>
                         </td>
 
-                        <td className="py-3.5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        {/* Actions */}
+                        <td className="py-4 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => togglePlayPause(colId)}
-                              className={`p-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 ${
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-sm ${
                                 isPaused
-                                  ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'
-                                  : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                  : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                               }`}
-                              title={isPaused ? 'Activate Subscription Access' : 'Pause Subscription Access'}
+                              title={isPaused ? 'Resume Subscription' : 'Pause Subscription Access'}
                             >
                               {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
                               <span>{isPaused ? 'Resume' : 'Pause'}</span>
@@ -543,16 +616,16 @@ export function SuperAdminModule() {
 
                             <button
                               onClick={() => handleResetPassword(c.adminEmail, c.name)}
-                              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                              title="Master Reset Admin Password"
+                              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 transition-colors"
+                              title="Reset Admin Password"
                             >
                               <Key className="w-3.5 h-3.5" />
                             </button>
 
                             <button
                               onClick={() => handleDeleteCollege(colId, c.name)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10"
-                              title="Remove College"
+                              className="p-2 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 border border-rose-100 transition-colors"
+                              title="Delete Institution"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -817,7 +890,6 @@ export function SuperAdminModule() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Agnihotri Polytechnic Nagthana Wardha"
                   value={newCollegeName}
                   onChange={(e) => setNewCollegeName(e.target.value)}
                   className="w-full mt-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-semibold"
@@ -830,7 +902,6 @@ export function SuperAdminModule() {
                   <input
                     type="text"
                     required
-                    placeholder="APN-WARDHA"
                     value={newCollegeCode}
                     onChange={(e) => setNewCollegeCode(e.target.value)}
                     className="w-full mt-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-mono uppercase font-bold"
@@ -841,23 +912,11 @@ export function SuperAdminModule() {
                   <label className="font-semibold text-slate-600">Campus Location / City</label>
                   <input
                     type="text"
-                    placeholder="Nagthana, Wardha"
                     value={newCollegeLocation}
                     onChange={(e) => setNewCollegeLocation(e.target.value)}
                     className="w-full mt-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="font-semibold text-slate-600">Library / Resource Center Name</label>
-                <input
-                  type="text"
-                  placeholder="Central Technical Library"
-                  value={newLibraryName}
-                  onChange={(e) => setNewLibraryName(e.target.value)}
-                  className="w-full mt-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900"
-                />
               </div>
 
               <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-100 space-y-3">
@@ -871,7 +930,6 @@ export function SuperAdminModule() {
                   <input
                     type="text"
                     required
-                    placeholder="Dr. Principal Name"
                     value={newAdminName}
                     onChange={(e) => setNewAdminName(e.target.value)}
                     className="w-full mt-1 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-900"
@@ -884,7 +942,6 @@ export function SuperAdminModule() {
                     <input
                       type="text"
                       required
-                      placeholder="admin@apnwardha.edu"
                       value={newAdminEmail}
                       onChange={(e) => setNewAdminEmail(e.target.value)}
                       className="w-full mt-1 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono"
@@ -896,7 +953,6 @@ export function SuperAdminModule() {
                     <input
                       type="text"
                       required
-                      placeholder="admin123"
                       value={newAdminPassword}
                       onChange={(e) => setNewAdminPassword(e.target.value)}
                       className="w-full mt-1 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono"
@@ -911,7 +967,11 @@ export function SuperAdminModule() {
                   <label className="font-semibold text-slate-600">Subscription Duration</label>
                   <select
                     value={newDuration}
-                    onChange={(e) => setNewDuration(e.target.value)}
+                    onChange={(e) => {
+                      const dur = e.target.value;
+                      setNewDuration(dur);
+                      setNewRenewalDate(calculateRenewalDate(dur));
+                    }}
                     className="w-full mt-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-bold"
                   >
                     <option value="6 Months">6 Months Plan</option>

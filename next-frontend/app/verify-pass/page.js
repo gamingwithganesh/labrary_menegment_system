@@ -25,6 +25,8 @@ function VerifyPassContent() {
   const name = searchParams.get('name') || 'Aarav Sharma';
   const email = searchParams.get('email') || 'student@libman.edu';
   const dept = searchParams.get('dept') || 'Computer Science & Engineering';
+  const issueDate = searchParams.get('issue') || '2026-10-05';
+  const expiryDate = searchParams.get('expiry') || '2027-06-30';
 
   const issuedBooks = [
     {
@@ -114,14 +116,22 @@ function VerifyPassContent() {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-2.5 text-xs">
-            <MapPin className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-            <div>
-              <span className="text-slate-500 block mb-0.5 font-medium">Residential & Campus Address</span>
-              <strong className="text-slate-800">Room 304, Block B, Tech Hostel, Main Campus, City University</strong>
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-2.5">
+              <Calendar className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-slate-500 block mb-0.5 font-medium">Pass Issue Date</span>
+                <strong className="text-slate-900 font-mono">{issueDate}</strong>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-2.5">
+              <Calendar className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-slate-500 block mb-0.5 font-medium">Pass Valid Thru (Expiry)</span>
+                <strong className="text-rose-700 font-mono font-bold">{expiryDate}</strong>
+              </div>
             </div>
           </div>
-        </div>
 
         {/* Books Issued Section */}
         <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-lg space-y-4">
@@ -136,12 +146,12 @@ function VerifyPassContent() {
           </div>
 
           <div className="space-y-3">
-            {issuedBooks.map((book) => (
-              <div key={book.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            {issuedBooks.map((book, idx) => (
+              <div key={book.id || book._id || idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-mono text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                      {book.id}
+                      {book.id || book._id || `BOOK-${idx + 1}`}
                     </span>
                     <span className="font-semibold text-slate-500">{book.rack}</span>
                   </div>

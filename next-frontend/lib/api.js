@@ -17,10 +17,19 @@ async function request(endpoint, options = {}) {
       headers
     });
 
-    const data = await res.json().catch(() => ({}));
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
 
     if (!res.ok) {
-      throw new Error(data.message || `Request failed with status ${res.status}`);
+      const errorMsg = data?.message || data?.error?.message || data?.error || `Request failed with status ${res.status}`;
+      const err = new Error(errorMsg);
+      err.status = res.status;
+      err.data = data;
+      throw err;
     }
 
     // Extract standardized { success, message, data } format
@@ -30,7 +39,10 @@ async function request(endpoint, options = {}) {
 
     return data;
   } catch (err) {
-    console.error(`API Error [${endpoint}]:`, err.message);
+    // Only warn if not a standard handled API error
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`API [${endpoint}]:`, err.message);
+    }
     throw err;
   }
 }
@@ -60,7 +72,7 @@ export const api = {
   },
 
   // ==========================================
-  // BOOKS & CATALOG
+  // BOOKS & CATALOG (Title vs Copy Model)
   // ==========================================
   async getBooks(query = '', category = '') {
     const params = new URLSearchParams();
@@ -112,20 +124,141 @@ export const api = {
     });
   },
 
-  async returnBook(circulationId) {
+  async returnBook(circulationId, extraData = {}) {
     return await request('/circulation/return', {
+      method: 'POST',
+      body: JSON.stringify({ circulationId, ...extraData })
+    });
+  },
+
+  async renewBook(circulationId) {
+    return await request('/circulation/renew', {
       method: 'POST',
       body: JSON.stringify({ circulationId })
     });
   },
 
+  async deleteCirculationRecord(circulationId) {
+    return await request(`/circulation?id=${circulationId}`, {
+      method: 'DELETE'
+    });
+  },
+
+  async clearCirculationRecords() {
+    return await request('/circulation?clearAll=true', {
+      method: 'DELETE'
+    });
+  },
+
   // ==========================================
-  // RESERVATIONS
+  // RESERVATIONS / HOLDS & ISSUE REQUESTS
   // ==========================================
+  async getReservations(filter = {}) {
+    const params = new URLSearchParams();
+    if (filter.memberEmail) params.append('memberEmail', filter.memberEmail);
+    if (filter.bookId) params.append('bookId', filter.bookId);
+    if (filter.status) params.append('status', filter.status);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return await request(`/reservations${qs}`);
+  },
+
   async createReservation(resData) {
     return await request('/reservations', {
       method: 'POST',
       body: JSON.stringify(resData)
+    });
+  },
+
+  async updateReservation(id, statusData) {
+    return await request('/reservations', {
+      method: 'PATCH',
+      body: JSON.stringify({ id, ...statusData })
+    });
+  },
+
+  async cancelReservation(id) {
+    return await request(`/reservations?id=${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  // ==========================================
+  // INVENTORY AUDIT & STOCK VERIFICATION
+  // ==========================================
+  async getInventoryAudits() {
+    return await request('/inventory/audit');
+  },
+
+  async runInventoryAudit(scannedBarcodes) {
+    return await request('/inventory/audit', {
+      method: 'POST',
+      body: JSON.stringify({ scannedBarcodes })
+    });
+  },
+
+  // ==========================================
+  // PROCUREMENT & VENDORS
+  // ==========================================
+  async getVendors() {
+    return await request('/procurement');
+  },
+
+  async createVendor(vendorData) {
+    return await request('/procurement', {
+      method: 'POST',
+      body: JSON.stringify(vendorData)
+    });
+  },
+
+  async createPurchaseOrder(vendorId, items, invoiceNumber, totalAmount) {
+    return await request('/procurement', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'create_po', vendorId, items, invoiceNumber, totalAmount })
+    });
+  },
+
+  // ==========================================
+  // INSTITUTIONAL POLICIES & SETTINGS
+  // ==========================================
+  async getSettings() {
+    return await request('/settings');
+  },
+
+  async updateSettings(settingsData) {
+    return await request('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settingsData)
+    });
+  },
+
+  // ==========================================
+  // NOTIFICATIONS
+  // ==========================================
+  async getNotifications() {
+    return await request('/notifications');
+  },
+
+  async sendNotification(notifData) {
+    return await request('/notifications', {
+      method: 'POST',
+      body: JSON.stringify(notifData)
+    });
+  },
+
+  // ==========================================
+  // AUDIT LOGS
+  // ==========================================
+  async getAuditLogs() {
+    return await request('/audit-logs');
+  },
+
+  // ==========================================
+  // BULK IMPORT / EXPORT
+  // ==========================================
+  async bulkImport(type, records) {
+    return await request('/import-export', {
+      method: 'POST',
+      body: JSON.stringify({ type, records })
     });
   },
 
@@ -154,6 +287,13 @@ export const api = {
     return await request('/admin/users', {
       method: 'POST',
       body: JSON.stringify(userData)
+    });
+  },
+
+  async updateUser(id, updateData) {
+    return await request(`/admin/users/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updateData)
     });
   },
 

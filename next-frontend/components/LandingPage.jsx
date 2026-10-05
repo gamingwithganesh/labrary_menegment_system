@@ -59,7 +59,7 @@ export function LandingPage() {
           </span>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
-            Streamlined Library Operations & <span className="gradient-text">OPAC Search</span>
+            Agnihotri Polytechnic <span className="gradient-text">Nagthana</span>
           </h1>
 
           <p className="mt-4 text-sm sm:text-base text-slate-600 font-medium">
@@ -113,7 +113,7 @@ export function LandingPage() {
 
       {/* Minimal Footer */}
       <footer className="py-4 border-t border-slate-200 text-center text-xs text-slate-500">
-        LIB-MAN Enterprise • Cloud Library Management
+        Developed by Z INTECH Private Limited, Nagpur
       </footer>
     </div>
   );

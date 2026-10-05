@@ -26,7 +26,6 @@ export function AuthProvider({ children }) {
           setViewState('dashboard');
           
           if (parsedUser.role === 'Super Admin') setActiveTab('superadmin');
-          else if (parsedUser.role === 'Admin') setActiveTab('collegeadmin');
           else setActiveTab('opac');
         }
       } catch (e) {
@@ -44,7 +43,6 @@ export function AuthProvider({ children }) {
     setViewState('dashboard');
 
     if (data.user.role === 'Super Admin') setActiveTab('superadmin');
-    else if (data.user.role === 'Admin') setActiveTab('collegeadmin');
     else setActiveTab('opac');
 
     return data.user;

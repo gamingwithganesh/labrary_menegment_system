@@ -12,19 +12,32 @@ import { MISModule } from '@/components/modules/MISModule';
 import { AdminModule } from '@/components/modules/AdminModule';
 import { SuperAdminModule } from '@/components/modules/SuperAdminModule';
 import { MyBooksModule } from '@/components/modules/MyBooksModule';
+import { BTPassModule } from '@/components/modules/BTPassModule';
 import { BTCardModal } from '@/components/BTCardModal';
 
 export function DashboardView() {
   const { activeTab, user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isBtCardOpen, setIsBtCardOpen] = useState(false);
+  const [selectedCardMember, setSelectedCardMember] = useState(null);
+
+  const handleOpenMemberBtCard = (member = null) => {
+    setSelectedCardMember(member);
+    setIsBtCardOpen(true);
+  };
 
   const renderActiveModule = () => {
     switch (activeTab) {
       case 'opac':
         return <OPACModule />;
       case 'mybooks':
-        return <MyBooksModule onOpenBtCard={() => setIsBtCardOpen(true)} />;
+        return <MyBooksModule onOpenBtCard={() => handleOpenMemberBtCard(null)} />;
+      case 'btpasses':
+      case 'btcard':
+        if (user?.role === 'Student' || user?.role === 'Faculty' || user?.role === 'Student/Faculty') {
+          return <MyBooksModule onOpenBtCard={() => handleOpenMemberBtCard(null)} />;
+        }
+        return <BTPassModule onOpenBtCard={(member) => handleOpenMemberBtCard(member)} />;
       case 'cataloguing':
         return <CataloguingModule />;
       case 'circulation':
@@ -33,8 +46,13 @@ export function DashboardView() {
         return <SerialModule />;
       case 'mis':
         return <MISModule />;
+      case 'finepolicy':
       case 'collegeadmin':
-        return <AdminModule />;
+        return <AdminModule defaultTab="settings" />;
+      case 'librarians':
+        return <AdminModule defaultTab="users" />;
+      case 'inventory':
+        return <CataloguingModule />;
       case 'superadmin':
         return <SuperAdminModule />;
       default:
@@ -47,13 +65,13 @@ export function DashboardView() {
       <Navbar
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-        onOpenBtCard={() => setIsBtCardOpen(true)}
+        onOpenBtCard={() => handleOpenMemberBtCard(null)}
       />
       <div className="flex-1 flex relative">
         <Sidebar
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
-          onOpenBtCard={() => setIsBtCardOpen(true)}
+          onOpenBtCard={() => handleOpenMemberBtCard(null)}
         />
         <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
           {renderActiveModule()}
@@ -62,7 +80,11 @@ export function DashboardView() {
 
       <BTCardModal
         isOpen={isBtCardOpen}
-        onClose={() => setIsBtCardOpen(false)}
+        onClose={() => {
+          setIsBtCardOpen(false);
+          setSelectedCardMember(null);
+        }}
+        member={selectedCardMember}
       />
     </div>
   );
