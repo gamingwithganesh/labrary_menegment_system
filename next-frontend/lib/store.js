@@ -489,7 +489,7 @@ export const dbStore = {
       copiesList.push({
         accessionNumber: acc,
         barcode: acc,
-        qrCode: `https://libman.edu/verify-book?acc=${acc}`,
+        qrCode: `/verify-book?acc=${acc}&title=${encodeURIComponent(bookData.title || '')}`,
         condition: 'New',
         status: 'Available',
         purchaseDate: new Date().toISOString().split('T')[0],
@@ -547,7 +547,7 @@ export const dbStore = {
       newCopies.push({
         accessionNumber: acc,
         barcode: acc,
-        qrCode: `https://libman.edu/verify-book?acc=${acc}`,
+        qrCode: `/verify-book?acc=${acc}&title=${encodeURIComponent(book.title || '')}`,
         condition: 'New',
         status: 'Available',
         purchaseDate: new Date().toISOString().split('T')[0],

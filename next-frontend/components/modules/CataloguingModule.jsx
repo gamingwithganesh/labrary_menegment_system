@@ -125,17 +125,21 @@ export function CataloguingModule() {
   const displayAuthor = formData.author || "Adam Drozdek";
   const displayIsbn = formData.isbn || "978-0131103627";
   const displayRack = formData.rack || "CS-04";
+  const displayCategory = formData.category || "Computer Science";
 
   useEffect(() => {
-    const payload = {
-      system: 'LIB-MAN Enterprise',
-      accId: currentAccId,
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const params = new URLSearchParams({
+      acc: currentAccId,
       title: displayTitle,
       author: displayAuthor,
       isbn: displayIsbn,
-      rack: displayRack
-    };
-    generateQRCodeDataUrl(payload).then((url) => {
+      rack: displayRack,
+      category: displayCategory,
+      status: 'Available'
+    });
+    const verifyUrl = `${origin}/verify-book?${params.toString()}`;
+    generateQRCodeDataUrl(verifyUrl).then((url) => {
       if (url) setRealQrUrl(url);
     });
   }, [formData]);
