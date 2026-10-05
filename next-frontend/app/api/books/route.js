@@ -57,3 +57,20 @@ export async function POST(request) {
     return errorResponse('Failed to catalog book');
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const clearAll = searchParams.get('clearAll') === 'true';
+
+    if (clearAll) {
+      await dbStore.clearBooks();
+      return successResponse(null, 'All books have been removed from the database');
+    }
+
+    return badRequestResponse('Please provide clearAll=true parameter');
+  } catch (error) {
+    console.error('Error in DELETE /api/books:', error);
+    return errorResponse('Failed to clear books');
+  }
+}

@@ -598,6 +598,19 @@ export const dbStore = {
     return null;
   },
 
+  async clearBooks() {
+    const conn = await connectDB();
+    if (conn) {
+      await Book.deleteMany({});
+    }
+    await initMemoryStore();
+    memoryStore.books = [];
+    if (typeof global !== 'undefined' && global._libmanMemoryStore) {
+      global._libmanMemoryStore.books = [];
+    }
+    return { acknowledged: true };
+  },
+
   // ==========================================
   // CIRCULATION & FINE ENGINE
   // ==========================================
