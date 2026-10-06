@@ -701,10 +701,10 @@ export function SuperAdminModule() {
                   No institutional tenants currently active for monitoring.
                 </div>
               ) : (
-                colleges.map((c) => {
+                colleges.map((c, idx) => {
                   const isActive = c.status === 'Active';
                   return (
-                    <div key={c.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4 text-xs">
+                    <div key={c._id || c.id || c.code || idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4 text-xs">
                       <div className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                         <div>
@@ -742,8 +742,8 @@ export function SuperAdminModule() {
                     No recent system log events recorded.
                   </div>
                 ) : (
-                  logs.map((log) => (
-                    <div key={log.id} className="p-3 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm text-xs">
+                  logs.map((log, idx) => (
+                    <div key={log._id || log.id || idx} className="p-3 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm text-xs">
                       <div className="flex items-center justify-between text-[10px] font-mono text-indigo-600 mb-1">
                         <span>{log.time}</span>
                         <span className="uppercase font-bold">{log.type}</span>
@@ -782,8 +782,8 @@ export function SuperAdminModule() {
                   className="w-full mt-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900"
                 >
                   <option value="ALL">All Colleges (Global Broadcast)</option>
-                  {colleges.map(c => (
-                    <option key={c.id} value={c.name}>{c.name} ({c.code})</option>
+                  {colleges.map((c, idx) => (
+                    <option key={c._id || c.id || c.code || idx} value={c.name}>{c.name} ({c.code})</option>
                   ))}
                 </select>
               </div>
@@ -840,8 +840,8 @@ export function SuperAdminModule() {
                   No active inter-library book transfers in progress.
                 </div>
               ) : (
-                interCollegeTransfers.map((item) => (
-                  <div key={item.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-between gap-4 text-xs">
+                interCollegeTransfers.map((item, idx) => (
+                  <div key={item._id || item.id || idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-between gap-4 text-xs">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-mono font-bold text-indigo-600">{item.id}</span>
