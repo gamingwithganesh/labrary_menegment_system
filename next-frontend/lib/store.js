@@ -302,16 +302,28 @@ export const dbStore = {
     const conn = await connectDB();
     if (conn) {
       const query = { isArchived: { $ne: true } };
-      if (collegeCode) query.collegeCode = collegeCode;
+      if (collegeCode) {
+        query.$or = [
+          { collegeCode: collegeCode },
+          { collegeCode: '' },
+          { collegeCode: { $exists: false } }
+        ];
+      }
       if (role && role !== 'All') query.role = role;
       if (search) {
-        query.$or = [
+        const searchConditions = [
           { name: { $regex: search, $options: 'i' } },
           { email: { $regex: search, $options: 'i' } },
           { department: { $regex: search, $options: 'i' } },
           { studentId: { $regex: search, $options: 'i' } },
           { btCardNumber: { $regex: search, $options: 'i' } }
         ];
+        if (query.$or) {
+          query.$and = [{ $or: query.$or }, { $or: searchConditions }];
+          delete query.$or;
+        } else {
+          query.$or = searchConditions;
+        }
       }
       return await User.find(query).sort({ createdAt: -1 }).lean();
     }
