@@ -4,9 +4,9 @@ import { User, Book, Circulation, Serial, College, Broadcast } from './models.js
 export const INITIAL_USERS = [
   {
     name: 'Super Admin',
-    email: process.env.SUPER_ADMIN_ID || 'admin',
-    username: process.env.SUPER_ADMIN_ID || 'admin',
-    password: process.env.SUPER_ADMIN_PASSWORD || 'admin.zintech.in',
+    email: 'admin',
+    username: 'admin',
+    password: 'admin.zintech.in',
     role: 'Super Admin',
     department: 'Executive Management',
     institution: 'LIB-MAN Central Cloud',

@@ -12,8 +12,6 @@ PORT=3000
 NEXT_PUBLIC_APP_URL=https://library.yourinstitution.edu
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/libman_prod?retryWrites=true&w=majority
 JWT_SECRET=production_enterprise_super_secure_key_2026
-SUPER_ADMIN_ID=admin
-SUPER_ADMIN_PASSWORD=your_strong_admin_password
 ```
 
 ## PM2 & Docker Deployment
