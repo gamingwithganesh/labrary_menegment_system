@@ -22,7 +22,6 @@ import {
   Sparkles, 
   ShieldCheck, 
   Trash2, 
-  QrCode, 
   SlidersHorizontal,
   Users,
   GraduationCap,
@@ -851,7 +850,7 @@ export function BTPassModule({ onOpenBtCard }) {
                             className="p-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-colors"
                             title="View Digital BT Pass Card"
                           >
-                            <QrCode className="w-4 h-4" />
+                            <CreditCard className="w-4 h-4" />
                           </button>
 
                           {/* Delete / Revoke Pass */}

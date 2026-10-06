@@ -1,25 +1,23 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { generateQRCodeDataUrl } from '@/lib/qrcode';
 import { 
   X, 
   Printer, 
   BookOpen, 
   User, 
-  Sparkles,
-  QrCode,
+  Calendar, 
+  CreditCard,
+  Building,
+  Hash,
+  Mail,
   ShieldCheck,
-  Calendar,
-  Layers,
-  Award,
-  CreditCard
+  CheckCircle2
 } from 'lucide-react';
 
 export function BTCardModal({ isOpen, onClose, member = null }) {
   const { user } = useAuth();
-  const [qrUrl, setQrUrl] = useState('');
 
   const currentTarget = member || user;
   const studentName = currentTarget?.name || 'Student Borrower';
@@ -38,17 +36,6 @@ export function BTCardModal({ isOpen, onClose, member = null }) {
   const issueDate = currentTarget?.btCardIssueDate || currentTarget?.createdAt?.split('T')[0] || '2026-10-05';
   const validUntil = currentTarget?.btCardValidUntil || '2027-06-30';
 
-  useEffect(() => {
-    if (isOpen) {
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-      const verifyUrl = `${baseUrl}/verify-pass?id=${cardId}&name=${encodeURIComponent(studentName)}&email=${encodeURIComponent(studentEmail)}&dept=${encodeURIComponent(studentDept)}&issue=${encodeURIComponent(issueDate)}&expiry=${encodeURIComponent(validUntil)}`;
-      
-      generateQRCodeDataUrl(verifyUrl).then((url) => {
-        if (url) setQrUrl(url);
-      });
-    }
-  }, [isOpen, cardId, studentName, studentEmail, studentDept, issueDate, validUntil]);
-
   if (!isOpen) return null;
 
   return (
@@ -60,7 +47,6 @@ export function BTCardModal({ isOpen, onClose, member = null }) {
           className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
           aria-label="Close"
         >
-
           <X className="w-5 h-5" />
         </button>
 
@@ -114,41 +100,50 @@ export function BTCardModal({ isOpen, onClose, member = null }) {
           </div>
 
           {/* Card Main Body */}
-          <div className="py-5 grid grid-cols-1 sm:grid-cols-3 gap-5 items-center">
-            {/* Left 2 Cols: User Details */}
-            <div className="sm:col-span-2 space-y-3 min-w-0">
-              <div>
+          <div className="py-5 space-y-4">
+            {/* Borrower Profile Row */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Borrower Name</span>
-                <h4 className="text-lg sm:text-xl font-black text-slate-900 truncate leading-tight mt-0.5">
+                <h4 className="text-xl sm:text-2xl font-black text-slate-900 truncate leading-tight mt-0.5">
                   {studentName}
                 </h4>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Branch / Dept</span>
-                  <p className="font-bold text-slate-800 text-xs mt-0.5 truncate">{studentDept}</p>
+              {/* Smart Card Chip Hologram Visual */}
+              <div className="w-12 h-9 rounded-lg bg-gradient-to-tr from-amber-200 via-amber-300 to-yellow-400 border border-amber-400/80 shadow-inner flex items-center justify-center shrink-0">
+                <div className="w-8 h-5 border border-amber-500/60 rounded grid grid-cols-2 gap-0.5 opacity-60">
+                  <div className="border-r border-amber-500/60" />
+                  <div />
                 </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Student / Roll ID</span>
-                  <p className="font-mono font-bold text-indigo-700 text-xs mt-0.5">{studentId}</p>
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Login ID</span>
-                <p className="text-xs font-mono font-medium text-slate-600 truncate mt-0.5">{studentEmail}</p>
               </div>
             </div>
 
-            {/* Right Col: Large High-Contrast 2D QR Code */}
-            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white border border-slate-200 shadow-sm shrink-0">
-              {qrUrl ? (
-                <img src={qrUrl} alt="Borrower QR Code" className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg" />
-              ) : (
-                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-mono">QR CODE</div>
-              )}
-              <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Scan to Verify</span>
+            {/* Information Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-sm">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <Building className="w-3 h-3 text-indigo-500" />
+                  Branch / Dept
+                </span>
+                <p className="font-bold text-slate-800 text-xs mt-1 truncate">{studentDept}</p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-sm">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <Hash className="w-3 h-3 text-purple-500" />
+                  Roll / ID Number
+                </span>
+                <p className="font-mono font-bold text-indigo-700 text-xs mt-1 truncate">{studentId}</p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white border border-slate-200/90 shadow-sm">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <Mail className="w-3 h-3 text-teal-500" />
+                  Login ID / Email
+                </span>
+                <p className="font-mono font-medium text-slate-700 text-xs mt-1 truncate">{studentEmail}</p>
+              </div>
             </div>
           </div>
 
@@ -162,7 +157,7 @@ export function BTCardModal({ isOpen, onClose, member = null }) {
 
             {/* Issue Date */}
             <div>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block flex items-center gap-1">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                 <Calendar className="w-3 h-3 text-indigo-500" />
                 <span>Issue Date</span>
               </span>
@@ -173,7 +168,7 @@ export function BTCardModal({ isOpen, onClose, member = null }) {
 
             {/* Expiry Date */}
             <div>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block flex items-center gap-1">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                 <Calendar className="w-3 h-3 text-rose-500" />
                 <span>Valid Thru</span>
               </span>
