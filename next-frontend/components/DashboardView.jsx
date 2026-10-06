@@ -39,7 +39,7 @@ export function DashboardView() {
         }
         return <BTPassModule onOpenBtCard={(member) => handleOpenMemberBtCard(member)} />;
       case 'cataloguing':
-        return <CataloguingModule />;
+        return <CataloguingModule key="cataloguing" defaultSubTab="accession" />;
       case 'circulation':
         return <CirculationModule />;
       case 'serials':
@@ -52,7 +52,7 @@ export function DashboardView() {
       case 'librarians':
         return <AdminModule defaultTab="users" />;
       case 'inventory':
-        return <CataloguingModule />;
+        return <CataloguingModule key="inventory" defaultSubTab="inventory" />;
       case 'superadmin':
         return <SuperAdminModule />;
       default:

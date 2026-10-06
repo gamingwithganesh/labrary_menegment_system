@@ -28,13 +28,19 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 
-export function CataloguingModule() {
-  const [activeSubTab, setActiveSubTab] = useState('accession'); // 'accession' | 'inventory' | 'procurement' | 'import'
+export function CataloguingModule({ defaultSubTab = 'accession' }) {
+  const [activeSubTab, setActiveSubTab] = useState(defaultSubTab); // 'accession' | 'inventory' | 'procurement' | 'import'
   const [labelMode, setLabelMode] = useState('qr'); // 'qr' | 'barcode'
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [realQrUrl, setRealQrUrl] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (defaultSubTab) {
+      setActiveSubTab(defaultSubTab);
+    }
+  }, [defaultSubTab]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -55,6 +61,8 @@ export function CataloguingModule() {
   const [scannedList, setScannedList] = useState([]);
   const [auditResult, setAuditResult] = useState(null);
   const [auditing, setAuditing] = useState(false);
+  const [pastAudits, setPastAudits] = useState([]);
+  const [loadingPastAudits, setLoadingPastAudits] = useState(false);
 
   // Procurement State
   const [vendors, setVendors] = useState([]);
@@ -70,6 +78,26 @@ export function CataloguingModule() {
   useEffect(() => {
     loadProcurementData();
   }, []);
+
+  const loadPastAudits = async () => {
+    setLoadingPastAudits(true);
+    try {
+      const data = await api.getInventoryAudits();
+      if (Array.isArray(data)) {
+        setPastAudits(data);
+      }
+    } catch (e) {
+      console.error('Failed to load past audits:', e);
+    } finally {
+      setLoadingPastAudits(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSubTab === 'inventory') {
+      loadPastAudits();
+    }
+  }, [activeSubTab]);
 
   const loadProcurementData = async () => {
     try {
@@ -148,11 +176,52 @@ export function CataloguingModule() {
   const handleAddScan = (e) => {
     e.preventDefault();
     if (!scanInput.trim()) return;
-    setScannedList(prev => [scanInput.trim(), ...prev]);
+    const items = scanInput.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+    setScannedList(prev => Array.from(new Set([...items, ...prev])));
     setScanInput('');
   };
 
+  const handleRemoveScan = (barcodeToRemove) => {
+    setScannedList(prev => prev.filter(b => b !== barcodeToRemove));
+  };
+
+  const handlePreloadCatalogBarcodes = async () => {
+    try {
+      const booksData = await api.getBooks();
+      const list = Array.isArray(booksData?.books) ? booksData.books : (Array.isArray(booksData) ? booksData : []);
+      const barcodes = [];
+      list.forEach(b => {
+        if (b.accessionCode) barcodes.push(b.accessionCode);
+        if (Array.isArray(b.items)) {
+          b.items.forEach(it => {
+            if (it.barcode) barcodes.push(it.barcode);
+            if (it.accessionNumber) barcodes.push(it.accessionNumber);
+          });
+        }
+      });
+      const unique = Array.from(new Set(barcodes));
+      if (unique.length > 0) {
+        setScannedList(unique);
+        setSuccessMsg(`Loaded ${unique.length} catalog barcodes into scanner buffer!`);
+        setTimeout(() => setSuccessMsg(''), 4000);
+      } else {
+        setScannedList(['ACC-2026-1001', 'ACC-2026-1002', 'ACC-2026-1003']);
+        setSuccessMsg('Loaded sample barcodes into scanner buffer.');
+        setTimeout(() => setSuccessMsg(''), 4000);
+      }
+    } catch (e) {
+      setScannedList(['ACC-2026-1001', 'ACC-2026-1002', 'ACC-2026-1003']);
+      setSuccessMsg('Loaded sample barcodes into scanner buffer.');
+      setTimeout(() => setSuccessMsg(''), 4000);
+    }
+  };
+
   const handleRunAudit = async () => {
+    if (scannedList.length === 0) {
+      setErrorMsg('Please scan or enter at least one book barcode before executing audit.');
+      setTimeout(() => setErrorMsg(''), 4000);
+      return;
+    }
     setAuditing(true);
     setErrorMsg('');
     try {
@@ -160,6 +229,7 @@ export function CataloguingModule() {
       setAuditResult(result);
       setSuccessMsg('Physical stock verification audit completed successfully!');
       setTimeout(() => setSuccessMsg(''), 4000);
+      loadPastAudits();
     } catch (err) {
       setErrorMsg(err.message || 'Audit failed');
       setTimeout(() => setErrorMsg(''), 4000);
@@ -498,89 +568,134 @@ export function CataloguingModule() {
       {/* SUB-TAB 2: INVENTORY STOCK VERIFICATION AUDIT */}
       {activeSubTab === 'inventory' && (
         <div className="space-y-6">
-          <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
-              <PackageCheck className="w-5 h-5 text-indigo-600" />
-              <span>Physical Stack Inventory Audit & Barcode Scanner</span>
-            </h2>
-            <p className="text-xs text-slate-500 mb-4">
-              Scan physical book barcodes into the scanner buffer to generate a real-time discrepancy matrix (Expected vs Found vs Missing vs Extra).
-            </p>
+          <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <PackageCheck className="w-5 h-5 text-indigo-600" />
+                  <span>Physical Stack Inventory Audit & Barcode Scanner</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Scan physical book barcodes into the scanner buffer to generate a real-time discrepancy matrix (Expected vs Found vs Missing vs Extra).
+                </p>
+              </div>
 
-            <form onSubmit={handleAddScan} className="flex gap-2 max-w-lg mb-4">
+              {/* Quick Action: Pre-load Catalog Barcodes */}
+              <button
+                onClick={handlePreloadCatalogBarcodes}
+                className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs border border-indigo-200 flex items-center gap-1.5 transition-all self-start sm:self-auto shrink-0 shadow-sm"
+                title="Automatically populate all registered catalog book barcodes into the scanner buffer"
+              >
+                <Sparkles className="w-4 h-4 text-indigo-600" />
+                <span>⚡ Auto-fill All Catalog Books</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleAddScan} className="flex gap-2 max-w-xl">
               <input
                 type="text"
-                placeholder="Scan or enter book barcode / accession..."
+                placeholder="Scan or type barcode / accession (e.g. ACC-2026-1001)..."
                 value={scanInput}
                 onChange={(e) => setScanInput(e.target.value)}
-                className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold"
+                className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               />
               <button
                 type="submit"
-                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold"
+                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition-all"
               >
                 Add Scan
               </button>
             </form>
 
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-600">
-                Buffered Scans: <strong className="text-indigo-600">{scannedList.length}</strong> items
-              </span>
+            {/* Buffer Barcodes List */}
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">
+                  Buffered Barcodes: <strong className="text-indigo-600 font-mono text-sm">{scannedList.length}</strong> items ready for audit
+                </span>
+                {scannedList.length > 0 && (
+                  <button
+                    onClick={() => setScannedList([])}
+                    className="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline"
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
+
+              {scannedList.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1">
+                  {scannedList.map((barcode, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-800 text-[11px] font-mono font-bold shadow-2xs"
+                    >
+                      <span>{barcode}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveScan(barcode)}
+                        className="p-0.5 hover:bg-slate-100 rounded text-slate-400 hover:text-rose-600"
+                        title="Remove"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic">
+                  No barcodes scanned yet. Enter barcodes manually or click &quot;⚡ Auto-fill All Catalog Books&quot; to test.
+                </p>
+              )}
+            </div>
+
+            {/* Execute Audit Button */}
+            <div className="flex items-center gap-3 pt-1">
               <button
                 onClick={handleRunAudit}
                 disabled={auditing || scannedList.length === 0}
-                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-500/25 flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:pointer-events-none text-white text-xs font-bold shadow-md shadow-emerald-500/25 flex items-center gap-2 transition-all"
               >
                 <ClipboardList className="w-4 h-4" />
-                <span>{auditing ? 'Verifying...' : 'Execute Stock Audit & Discrepancy Matrix'}</span>
+                <span>{auditing ? 'Verifying Physical Stock...' : 'Execute Stock Audit & Discrepancy Matrix'}</span>
               </button>
-              {scannedList.length > 0 && (
-                <button
-                  onClick={() => setScannedList([])}
-                  className="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50"
-                >
-                  Clear Buffer
-                </button>
-              )}
             </div>
           </div>
 
           {/* Audit Results Discrepancy Matrix */}
           {auditResult && (
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="p-6 rounded-3xl bg-white border-2 border-indigo-200 shadow-md space-y-4 animate-fadeIn">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600" />
-                  <span>Audit Summary (ID: {auditResult.auditId})</span>
+                  <CheckCircle className="w-5 h-5 text-emerald-600" />
+                  <span>Audit Summary (ID: <strong className="font-mono text-indigo-700">{auditResult.auditId}</strong>)</span>
                 </h3>
-                <span className="text-xs font-mono text-slate-500">{auditResult.date}</span>
+                <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">{auditResult.date}</span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-slate-500 block mb-0.5">Total Expected</span>
-                  <strong className="text-lg text-slate-900">{auditResult.totalExpected}</strong>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-slate-500 block mb-0.5 font-medium">Total Expected</span>
+                  <strong className="text-xl text-slate-900 font-extrabold">{auditResult.totalExpected}</strong>
                 </div>
-                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
                   <span className="text-emerald-700 block mb-0.5 font-semibold">Found in Stack</span>
-                  <strong className="text-lg text-emerald-700">{auditResult.foundCount}</strong>
+                  <strong className="text-xl text-emerald-700 font-extrabold">{auditResult.foundCount}</strong>
                 </div>
-                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200">
+                <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200">
                   <span className="text-rose-700 block mb-0.5 font-semibold">Missing Discrepancies</span>
-                  <strong className="text-lg text-rose-700">{auditResult.missingCount}</strong>
+                  <strong className="text-xl text-rose-700 font-extrabold">{auditResult.missingCount}</strong>
                 </div>
-                <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200">
+                <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
                   <span className="text-amber-700 block mb-0.5 font-semibold">Extra Uncatalogued</span>
-                  <strong className="text-lg text-amber-700">{auditResult.extraCount}</strong>
+                  <strong className="text-xl text-amber-700 font-extrabold">{auditResult.extraCount}</strong>
                 </div>
               </div>
 
               {/* Detailed Discrepancy Table */}
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
                 <table className="w-full text-left text-xs min-w-[650px]">
-
-                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                     <tr>
                       <th className="p-3">Barcode / Accession</th>
                       <th className="p-3">Book Title</th>
@@ -592,17 +707,17 @@ export function CataloguingModule() {
                     {auditResult.discrepancies?.map((item, idx) => (
                       <tr key={idx} className="hover:bg-slate-50/50">
                         <td className="p-3 font-mono font-bold text-slate-900">{item.barcode}</td>
-                        <td className="p-3 font-medium text-slate-800">{item.title}</td>
+                        <td className="p-3 font-semibold text-slate-800">{item.title}</td>
                         <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            item.status === 'Found' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            item.status === 'Missing' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
-                            'bg-amber-50 text-amber-700 border border-amber-200'
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            item.status === 'Found' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            item.status === 'Missing' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                            'bg-amber-50 text-amber-700 border-amber-200'
                           }`}>
                             {item.status}
                           </span>
                         </td>
-                        <td className="p-3 text-slate-500">{item.notes}</td>
+                        <td className="p-3 text-slate-600 font-medium">{item.notes}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -610,6 +725,73 @@ export function CataloguingModule() {
               </div>
             </div>
           )}
+
+          {/* Historical Stock Audits Archive */}
+          <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <PackageCheck className="w-4 h-4 text-slate-500" />
+                <h3 className="text-sm font-bold text-slate-900">Stock Verification Audit Archive</h3>
+              </div>
+              <button
+                onClick={loadPastAudits}
+                className="p-1.5 rounded-xl border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 transition-colors"
+                title="Refresh past audits list"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingPastAudits ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+
+            {loadingPastAudits ? (
+              <div className="py-8 text-center text-xs text-slate-400">Loading historical audit reports...</div>
+            ) : pastAudits.length > 0 ? (
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="w-full text-left text-xs min-w-[650px]">
+                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3">Audit ID</th>
+                      <th className="p-3">Date & Time</th>
+                      <th className="p-3">Audited By</th>
+                      <th className="p-3">Expected</th>
+                      <th className="p-3">Found</th>
+                      <th className="p-3">Missing</th>
+                      <th className="p-3">Extra</th>
+                      <th className="p-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {pastAudits.map((a, i) => (
+                      <tr key={a._id || a.auditId || i} className="hover:bg-slate-50/50">
+                        <td className="p-3 font-mono font-bold text-indigo-600">{a.auditId || `AUDIT-${i + 1}`}</td>
+                        <td className="p-3 font-mono text-slate-600">{a.date || a.createdAt?.split('T')[0] || 'N/A'}</td>
+                        <td className="p-3 font-medium text-slate-800">{a.auditedBy || 'Librarian'}</td>
+                        <td className="p-3 font-bold text-slate-900">{a.totalExpected ?? 0}</td>
+                        <td className="p-3 font-bold text-emerald-600">{a.foundCount ?? 0}</td>
+                        <td className="p-3 font-bold text-rose-600">{a.missingCount ?? 0}</td>
+                        <td className="p-3 font-bold text-amber-600">{a.extraCount ?? 0}</td>
+                        <td className="p-3 text-right">
+                          <button
+                            onClick={() => {
+                              setAuditResult(a);
+                              setSuccessMsg(`Loaded Audit Report: ${a.auditId}`);
+                              setTimeout(() => setSuccessMsg(''), 4000);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] transition-colors"
+                          >
+                            View Report
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="py-8 text-center text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                No past inventory stock audit records found. Scan physical stack barcodes above to generate the first verified stock matrix.
+              </div>
+            )}
+          </div>
         </div>
       )}
 
