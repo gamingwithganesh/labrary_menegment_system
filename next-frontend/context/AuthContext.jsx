@@ -23,7 +23,6 @@ export function AuthProvider({ children }) {
           setToken(savedToken);
           const parsedUser = JSON.parse(savedUser);
           setUser(parsedUser);
-          setViewState('dashboard');
           
           if (parsedUser.role === 'Super Admin') setActiveTab('superadmin');
           else setActiveTab('opac');
