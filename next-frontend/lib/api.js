@@ -1,4 +1,21 @@
 function getApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+    if (!envUrl || envUrl === '/') return '/api';
+
+    // When running on a custom domain (e.g. apn-lms.zintech04.com),
+    // prioritize same-origin relative /api to prevent CORS blocks and improve response speed
+    if (envUrl.startsWith('http')) {
+      try {
+        const parsed = new URL(envUrl);
+        if (parsed.host === window.location.host || (parsed.host.includes('vercel.app') && !window.location.host.includes('vercel.app'))) {
+          return '/api';
+        }
+      } catch {}
+    }
+    return envUrl.replace(/\/$/, '');
+  }
+
   const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').trim();
   if (!envUrl || envUrl === '/') {
     return '/api';
