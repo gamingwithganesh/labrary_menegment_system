@@ -137,7 +137,8 @@ export function SerialModule() {
           <div className="p-8 text-center text-slate-400 text-xs">No active serials or journals found.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[650px]">
+
               <thead className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase">
                 <tr>
                   <th className="pb-3">Journal Title</th>

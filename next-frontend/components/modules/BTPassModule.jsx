@@ -727,7 +727,8 @@ export function BTPassModule({ onOpenBtCard }) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[750px]">
+
               <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
                 <tr>
                   <th className="p-3">Borrower & ID</th>
@@ -877,7 +878,7 @@ export function BTPassModule({ onOpenBtCard }) {
       {/* ======================================================== */}
       {memberToEdit && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+          <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
@@ -998,7 +999,7 @@ export function BTPassModule({ onOpenBtCard }) {
       {/* Revoke / Delete Confirmation Modal */}
       {memberToDelete && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+          <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">

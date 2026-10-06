@@ -785,7 +785,8 @@ export function CirculationModule() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[700px]">
+
                 <thead className="border-b border-slate-200 text-slate-400 font-bold uppercase">
                   <tr>
                     <th className="pb-3">Trans ID</th>

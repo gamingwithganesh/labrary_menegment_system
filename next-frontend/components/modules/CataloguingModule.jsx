@@ -578,7 +578,8 @@ export function CataloguingModule() {
 
               {/* Detailed Discrepancy Table */}
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[650px]">
+
                   <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                     <tr>
                       <th className="p-3">Barcode / Accession</th>

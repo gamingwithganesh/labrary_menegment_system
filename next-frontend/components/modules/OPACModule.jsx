@@ -44,26 +44,35 @@ export function OPACModule() {
   const [newLocation, setNewLocation] = useState('Rack CS-01');
 
   useEffect(() => {
-    loadBooks();
+    // Initial load of auxiliary data
+    Promise.all([
+      api.getCirculationRecords().catch(() => []),
+      api.getReservations().catch(() => [])
+    ]).then(([circs, resData]) => {
+      setCirculationList(Array.isArray(circs) ? circs : []);
+      setReservations(Array.isArray(resData) ? resData : []);
+    });
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadBooks();
+    }, 200);
+    return () => clearTimeout(timer);
   }, [query, selectedCategory]);
 
   const loadBooks = async () => {
     setLoading(true);
     try {
-      const [data, circs, resData] = await Promise.all([
-        api.getBooks(query, selectedCategory),
-        api.getCirculationRecords(),
-        api.getReservations()
-      ]);
+      const data = await api.getBooks(query, selectedCategory);
       setBooks(Array.isArray(data) ? data : []);
-      setCirculationList(Array.isArray(circs) ? circs : []);
-      setReservations(Array.isArray(resData) ? resData : []);
     } catch (err) {
       console.error('Failed to load books:', err);
     } finally {
       setLoading(false);
     }
   };
+
 
   const categories = ['All', 'Computer Science', 'Physics', 'Software Engineering', 'Artificial Intelligence', 'Mathematics'];
 
@@ -445,7 +454,7 @@ export function OPACModule() {
       {/* Add New Book Modal */}
       {showAddModal && isLibrarian && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md p-6 rounded-3xl bg-white border border-slate-200 shadow-2xl relative">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-white border border-slate-200 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button 
               onClick={() => setShowAddModal(false)}
               className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600"

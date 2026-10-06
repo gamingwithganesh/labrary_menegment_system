@@ -238,30 +238,36 @@ export const dbStore = {
   // AUTH & USERS
   // ==========================================
   async findUserByEmail(identifier) {
-    const term = (identifier || '').toLowerCase().trim();
-    if (!term) return null;
+    const rawTerm = (identifier || '').trim();
+    if (!rawTerm) return null;
+    const term = rawTerm.toLowerCase();
 
     const conn = await connectDB();
     if (conn) {
-      const adminId = (process.env.SUPER_ADMIN_ID || 'admin').toLowerCase().trim();
-      if (term === 'admin' || term === 'superadmin' || term === adminId || term === 'admin@zintech.in') {
+      const adminId = (process.env.SUPER_ADMIN_ID || 'admin').trim();
+      const adminIdLower = adminId.toLowerCase();
+      if (term === 'admin' || term === 'superadmin' || term === adminIdLower || term === 'admin@zintech.in') {
         const superUser = await User.findOne({
           $or: [
-            { email: adminId },
-            { username: adminId },
-            { email: 'admin' },
-            { username: 'admin' },
+            { email: new RegExp(`^${adminId}$`, 'i') },
+            { username: new RegExp(`^${adminId}$`, 'i') },
+            { email: /^admin$/i },
+            { username: /^admin$/i },
             { role: 'Super Admin' }
           ]
         });
         if (superUser) return superUser;
       }
+
+      const safeRegex = new RegExp(`^${rawTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
       return await User.findOne({
         $or: [
-          { email: term },
-          { username: term },
-          { studentId: term },
-          { btCardNumber: term }
+          { email: safeRegex },
+          { username: safeRegex },
+          { studentId: safeRegex },
+          { btCardNumber: safeRegex },
+          { employeeId: safeRegex },
+          { phone: rawTerm }
         ]
       });
     }
@@ -272,13 +278,16 @@ export const dbStore = {
       const uName = (u.username || '').toLowerCase().trim();
       const uStudentId = (u.studentId || '').toLowerCase().trim();
       const uBt = (u.btCardNumber || '').toLowerCase().trim();
+      const uEmp = (u.employeeId || '').toLowerCase().trim();
+      const uPhone = (u.phone || '').trim();
       const adminId = (process.env.SUPER_ADMIN_ID || 'admin').toLowerCase().trim();
       if (term === 'admin' || term === 'superadmin' || term === adminId || term === 'admin@zintech.in') {
         return u.role === 'Super Admin' || uEmail === 'admin' || uEmail === adminId || uName === 'admin' || uName === adminId;
       }
-      return uEmail === term || uName === term || uStudentId === term || uBt === term;
+      return uEmail === term || uName === term || uStudentId === term || uBt === term || uEmp === term || uPhone === rawTerm;
     }) || null;
   },
+
 
   async findUserById(id) {
     const conn = await connectDB();

@@ -52,14 +52,15 @@ export function BTCardModal({ isOpen, onClose, member = null }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
-      <div className="w-full max-w-xl rounded-3xl bg-white shadow-2xl relative border border-slate-200 p-6 sm:p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
+      <div className="w-full max-w-xl rounded-3xl bg-white shadow-2xl relative border border-slate-200 p-4 sm:p-8 max-h-[90vh] overflow-y-auto">
         {/* Top Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
           aria-label="Close"
         >
+
           <X className="w-5 h-5" />
         </button>
 

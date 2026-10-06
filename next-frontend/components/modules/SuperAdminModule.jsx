@@ -484,7 +484,8 @@ export function SuperAdminModule() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[700px]">
+
                   <thead className="bg-slate-50/75 text-slate-500 font-bold text-[11px] uppercase tracking-wider border-y border-slate-100">
                     <tr>
                       <th className="py-3.5 px-4 rounded-l-xl">Institution & Branch</th>
@@ -868,7 +869,7 @@ export function SuperAdminModule() {
       {/* Create College Admin Modal with Subscription Plan & Price Dropdowns */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md p-6 rounded-3xl glass-card shadow-2xl relative border-2 border-indigo-500/30">
+          <div className="w-full max-w-md p-6 rounded-3xl glass-card shadow-2xl relative border-2 border-indigo-500/30 max-h-[90vh] overflow-y-auto">
             <button 
               onClick={() => setShowCreateModal(false)}
               className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white"

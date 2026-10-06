@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '');
 
 async function request(endpoint, options = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('libman_token') : null;
@@ -9,7 +9,9 @@ async function request(endpoint, options = {}) {
     ...(options.headers || {})
   };
 
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${cleanEndpoint}`;
+
 
   try {
     const res = await fetch(url, {
