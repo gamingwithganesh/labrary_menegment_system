@@ -26,7 +26,7 @@ function getApiBaseUrl() {
 const API_BASE_URL = getApiBaseUrl();
 
 async function request(endpoint, options = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('libman_token') : null;
+  const token = typeof window !== 'undefined' ? (sessionStorage.getItem('libman_token') || localStorage.getItem('libman_token')) : null;
   
   const headers = {
     'Content-Type': 'application/json',

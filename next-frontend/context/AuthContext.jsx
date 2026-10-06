@@ -13,23 +13,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // When a user visits the app, always start fresh on the Landing Page and require password login
   useEffect(() => {
     setMounted(true);
+    // Clear any stale persistent tokens so password is asked each visit
     if (typeof window !== 'undefined') {
       try {
-        const savedToken = localStorage.getItem('libman_token');
-        const savedUser = localStorage.getItem('libman_user');
-        if (savedToken && savedUser) {
-          setToken(savedToken);
-          const parsedUser = JSON.parse(savedUser);
-          setUser(parsedUser);
-          
-          if (parsedUser.role === 'Super Admin') setActiveTab('superadmin');
-          else setActiveTab('opac');
-        }
-      } catch (e) {
-        console.error('Failed to restore session:', e);
-      }
+        localStorage.removeItem('libman_token');
+        localStorage.removeItem('libman_user');
+      } catch {}
     }
   }, []);
 
@@ -37,8 +29,14 @@ export function AuthProvider({ children }) {
     const data = await api.login(email, password);
     setToken(data.access_token);
     setUser(data.user);
-    localStorage.setItem('libman_token', data.access_token);
-    localStorage.setItem('libman_user', JSON.stringify(data.user));
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem('libman_token', data.access_token);
+        sessionStorage.setItem('libman_user', JSON.stringify(data.user));
+        localStorage.setItem('libman_token', data.access_token);
+        localStorage.setItem('libman_user', JSON.stringify(data.user));
+      } catch {}
+    }
     setViewState('dashboard');
 
     if (data.user.role === 'Super Admin') setActiveTab('superadmin');
@@ -50,13 +48,19 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await api.logout();
-    } catch (e) {
+    } catch {
       // Ignore network errors during logout
     }
     setUser(null);
     setToken(null);
-    localStorage.removeItem('libman_token');
-    localStorage.removeItem('libman_user');
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.removeItem('libman_token');
+        sessionStorage.removeItem('libman_user');
+        localStorage.removeItem('libman_token');
+        localStorage.removeItem('libman_user');
+      } catch {}
+    }
     setViewState('landing');
   };
 

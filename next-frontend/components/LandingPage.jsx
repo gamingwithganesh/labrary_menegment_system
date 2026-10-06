@@ -40,22 +40,13 @@ export function LandingPage() {
             >
               {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-slate-600" />}
             </button>
-            {user ? (
-              <button
-                onClick={() => setViewState('dashboard')}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all"
-              >
-                <span>Dashboard ({user.name})</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setViewState('login')}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Sign In</span>
-              </button>
-            )}
+            <button
+              onClick={() => setViewState('login')}
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
           </div>
         </div>
       </header>
@@ -77,10 +68,10 @@ export function LandingPage() {
 
           <div className="mt-8 flex justify-center">
             <button
-              onClick={() => setViewState(user ? 'dashboard' : 'login')}
+              onClick={() => setViewState('login')}
               className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all"
             >
-              <span>{user ? 'Launch Library Portal' : 'Access Library Portal'}</span>
+              <span>Access Library Portal</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
