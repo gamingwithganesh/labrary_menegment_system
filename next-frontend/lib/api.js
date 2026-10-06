@@ -1,4 +1,12 @@
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '');
+function getApiBaseUrl() {
+  const envUrl = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+  if (!envUrl || envUrl === '/') {
+    return '/api';
+  }
+  return envUrl.replace(/\/$/, '');
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 async function request(endpoint, options = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('libman_token') : null;
@@ -9,8 +17,18 @@ async function request(endpoint, options = {}) {
     ...(options.headers || {})
   };
 
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${cleanEndpoint}`;
+  let url;
+  if (endpoint.startsWith('http')) {
+    url = endpoint;
+  } else {
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    if (cleanEndpoint.startsWith('/api/')) {
+      url = cleanEndpoint;
+    } else {
+      const base = API_BASE_URL || '/api';
+      url = base.endsWith('/api') ? `${base}${cleanEndpoint}` : `${base}/api${cleanEndpoint}`;
+    }
+  }
 
 
   try {

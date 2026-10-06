@@ -17,6 +17,14 @@ const nextConfig = {
         ]
       }
     ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/auth/:path*',
+        destination: '/api/auth/:path*'
+      }
+    ];
   }
 };
 
